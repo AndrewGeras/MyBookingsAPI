@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI
 from uvicorn import run
 
 from hotels import router as hotels_router
