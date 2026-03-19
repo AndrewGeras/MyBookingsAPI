@@ -3,8 +3,8 @@ from typing import Annotated
 from fastapi import Query, Body, HTTPException, APIRouter
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
 
-from schemas.hotels import Hotel, HotelPATCH
-from dependencies import PaginationDep
+from src.schemas.hotels import Hotel, HotelPATCH
+from api.dependencies import PaginationDep
 
 hotels = [
     {"id": 1, "title": "Sochi", "name": "sochi"},
@@ -33,6 +33,9 @@ def get_hotels(
         if title and hotel["title"] != title:
             continue
         hotels_.append(hotel)
+
+    if not hotels_:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Такой отель не найден")
 
     per_page, page = pagination.per_page, pagination.page
     num_pages = len(hotels_) // per_page + bool(len(hotels_) % per_page)
