@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 class PaginationParams(BaseModel):
     page:  Annotated[int, Query(1, description="номер страницы", gt=0),]
-    per_page: Annotated[int, Query(3, description="количество отелей на странице", gt=0, le=30)]
+    per_page: Annotated[int | None, Query(None, description="количество отелей на странице", gt=0, le=30)]
 
 
 PaginationDep = Annotated[PaginationParams, Depends()]
