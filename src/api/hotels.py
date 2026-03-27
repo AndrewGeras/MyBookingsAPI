@@ -1,70 +1,47 @@
 from typing import Annotated
 
-from fastapi import Query, Body, HTTPException, APIRouter
-from starlette.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
-from sqlalchemy import insert, select
+from fastapi import Query, Body, APIRouter
+from starlette.status import HTTP_204_NO_CONTENT, HTTP_201_CREATED
 
 from src.schemas.hotels import Hotel, HotelPATCH
 from src.api.dependencies import PaginationDep
-from src.database import async_session_maker, engine
-from src.models.hotels import HotelsORM
+from src.database import async_session_maker
+from src.repositories.hotels_repo import HotelsRepo
 
-hotels = [
-    {"id": 1, "title": "Sochi", "name": "sochi"},
-    {"id": 2, "title": "Дубай", "name": "dubai"},
-    {"id": 3, "title": "Мальдивы", "name": "maldivi"},
-    {"id": 4, "title": "Геледжик", "name": "gelendzik"},
-    {"id": 5, "title": "Москва", "name": "moskva"},
-    {"id": 6, "title": "Казань", "name": "kazan"},
-    {"id": 7, "title": "Санкт-Петербург", "name": "sankt-peterburg"},
-    {"id": 8, "title": "Париж", "name": "pariz"},
-]
 
 router = APIRouter(prefix="/hotels")
 
 
-@router.get("")
+@router.get("",
+            description="<h2>Метод постраничного выбора отелей по названию и локации</h2>")
 async def get_hotels(
         pagination: PaginationDep,
         title: str | None = Query(default=None, description="название отеля"),
-        location: str | None = Query(default=None, description="локация отеля")):
+        location: str | None = Query(default=None, description="локация отеля")
+):
 
     per_page = pagination.per_page or 3
     page = pagination.page
 
     async with async_session_maker() as session:
-        query = select(HotelsORM).order_by(HotelsORM.id)
-        if title:
-            query = query.where(HotelsORM.title.ilike(f"%{title.strip()}%"))
-        if location:
-            query = query.where(HotelsORM.location.ilike(f"%{location.strip()}%"))
-
-        query = (
-            query
-            .limit(per_page)
-            .offset(per_page * (page - 1))
+        return await HotelsRepo(session).get_all(
+            title=title,
+            location=location,
+            limit=per_page,
+            offset=per_page * (page - 1)
         )
 
-        print(query.compile(engine, compile_kwargs={"literal_binds": True}))
 
-        query_result = await session.scalars(query)
-
-    hotels = query_result.all()
-
-    if not hotels:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Отель по запросу не найден")
-
-    # num_pages = len(hotels) // per_page + bool(len(hotels) % per_page)
-    # print(hotels)
-    #
-    # if page > num_pages:
-    #     raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=f"Превышено число страниц {num_pages}")
-
-    return hotels
+@router.get("/{hotel_id}",
+            description="<h2>Метод для получения одного отеля по его ID</h2>")
+async def get_hotel(hotel_id: int):
+    async with async_session_maker() as session:
+        return await HotelsRepo(session).get_one_or_none(id=hotel_id)
 
 
-
-@router.post("")
+@router.post("",
+             status_code=HTTP_201_CREATED,
+             description="<h2>Метод для добавления нового отеля</h2>")
 async def create_hotel(hotel: Annotated[Hotel, Body(openapi_examples={
                         "normal": {
                             "summary": "Валидные данные",
@@ -86,39 +63,33 @@ async def create_hotel(hotel: Annotated[Hotel, Body(openapi_examples={
             ]
         ):
     async with async_session_maker() as session:
-        add_hotel_stmt = insert(HotelsORM).values(**hotel.model_dump())
-        print(add_hotel_stmt.compile(engine, compile_kwargs={"literal_binds": True}))
-        await session.execute(add_hotel_stmt)
+        hotel = await HotelsRepo(session).add(hotel)
+        await session.commit()
+    return {"status": "OK", "data": hotel}
+
+
+@router.put("/{hotel_id}",
+            status_code=HTTP_204_NO_CONTENT,
+            description="<h2><strong>Полное</strong> редактирование данных об отеле</h2>")
+async def update_hotel(hotel_id: int, hotel_data: Hotel):
+    async with async_session_maker() as session:
+        await HotelsRepo(session).edit(data=hotel_data, id=hotel_id)
         await session.commit()
 
-    return {"status": "OK"}
+
+@router.patch("/{hotel_id}",
+              status_code=HTTP_204_NO_CONTENT,
+              description="<h2><strong>Частичное</strong> редактирование данных об отеле</h2>")
+async def edit_hotel(hotel_id: int, hotel_data: HotelPATCH):
+    async with async_session_maker() as session:
+        await HotelsRepo(session).edit(data=hotel_data, exclude_unset=True, id=hotel_id)
+        await session.commit()
 
 
-@router.put("/{hotel_id}", description="<strong>Полное</strong> редактирование данных об отеле")
-def update_hotel(hotel_id: int, hotel_data: Hotel):
-    global hotels
-    for hotel in hotels:
-        if hotel["id"] == hotel_id:
-            hotel["title"], hotel["name"] = hotel_data.title, hotel_data.name
-            return hotel
-    raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="not Found")
-
-
-@router.patch("/{hotel_id}", description="<strong>Частичное</strong> редактирование данных об отеле")
-def edit_hotel(hotel_id: int, hotel_data: HotelPATCH):
-    global hotels
-    for hotel in hotels:
-        if hotel["id"] == hotel_id:
-            if hotel_data.title:
-                hotel["title"] = hotel_data.title
-            if hotel_data.name:
-                hotel["name"] = hotel_data.name
-            return hotel
-    raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="not Found")
-
-
-@router.delete("/{hotel_id}")
-def delete_hotel(hotel_id: int):
-    global hotels
-    hotels = [hotel for hotel in hotels if hotel["id"] != hotel_id]
-    return {"status": "OK"}
+@router.delete("/{hotel_id}",
+               status_code=HTTP_204_NO_CONTENT,
+               description="<h2>Метод для удаления отеля по ID</h2>")
+async def delete_hotel(hotel_id: int):
+    async with async_session_maker() as session:
+        await HotelsRepo(session).delete(id=hotel_id)
+        await session.commit()
