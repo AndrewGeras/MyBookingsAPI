@@ -4,10 +4,12 @@ from sqlalchemy import select
 
 from src.repositories.base_repo import BaseRepository
 from src.models.hotels import HotelsORM
+from src.schemas.hotels import Hotel
 
 
 class HotelsRepo(BaseRepository):
     model = HotelsORM
+    schema = Hotel
 
     async def get_all(
             self,
@@ -30,11 +32,8 @@ class HotelsRepo(BaseRepository):
 
         print(query.compile(compile_kwargs={"literal_binds": True}))
 
-        query_result = await self.session.scalars(query)
-        hotels = query_result.all()
-
-        if not hotels:
-            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Отель по запросу не найден")
+        query_result = await self.session.execute(query)
+        hotels = [self.schema.model_validate(model, from_attributes=True) for model in query_result.scalars().all()]
 
         return hotels
 

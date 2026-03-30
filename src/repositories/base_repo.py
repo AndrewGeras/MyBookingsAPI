@@ -6,32 +6,45 @@ from src.database import Base
 
 
 class BaseRepository:
-    model: Base | None = None
+    model: Base = None
+    schema: BaseModel = None
 
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_all(self, *args, **kwargs):
+    async def get_all(self, *args, **kwargs) -> [BaseModel]:
         query = select(self.model)
-        query_result = await self.session.scalars(query)
-        return query_result.all()
+        query_result = await self.session.execute(query)
+        return [self.schema.model_validate(model) for model in query_result.scalars().all()]
 
-    async def get_one_or_none(self, **filters):
+    async def get_one_or_none(self, **filters) -> BaseModel | None:
         query = select(self.model).filter_by(**filters)
         query_result = await self.session.scalars(query)
-        return query_result.one_or_none()
+        model = query_result.one_or_none()
+        if model:
+            return self.schema.model_validate(model)
 
-    async def add(self, data: BaseModel):
+    async def add(self, data: BaseModel) -> BaseModel | None:
         add_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
-        obj = await self.session.execute(add_stmt)
-        return obj.scalars().one()
+        result = await self.session.execute(add_stmt)
+        model = result.scalars().one()
+        return self.schema.model_validate(model)
 
-    async def edit(self, data: BaseModel, exclude_unset=False, **filter_by) -> None:
+    async def edit(self, data: BaseModel, exclude_unset=False, **filter_by) -> BaseModel | None:
         update_stmt = (update(self.model)
                        .filter_by(**filter_by)
-                       .values(**data.model_dump(exclude_unset=exclude_unset)))
-        await self.session.execute(update_stmt)
+                       .values(**data.model_dump(exclude_unset=exclude_unset))
+                       .returning(self.model))
+        result = await self.session.execute(update_stmt)
+        model = result.scalars().one_or_none()
+        if model:
+            return self.schema.model_validate(model)
 
-    async def delete(self, **filter_by) -> None:
-        delete_stmt = delete(self.model).filter_by(**filter_by)
-        await self.session.execute(delete_stmt)
+    async def delete(self, **filter_by) -> BaseModel | None:
+        delete_stmt = (delete(self.model)
+                       .filter_by(**filter_by)
+                       .returning(self.model))
+        result = await self.session.execute(delete_stmt)
+        model = result.scalars().one_or_none()
+        if model:
+            return self.schema.model_validate(model)
