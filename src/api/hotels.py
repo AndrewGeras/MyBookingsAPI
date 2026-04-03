@@ -10,11 +10,11 @@ from src.repositories.hotels_repo import HotelsRepo
 from src.api.utils import get_object_or_404
 
 
-router = APIRouter(prefix="/hotels")
+router = APIRouter(prefix="/hotels", tags=["Отели",])
 
 
 @router.get("",
-            description="<h2>Метод постраничного выбора отелей по названию и локации</h2>")
+            description="<h2>Ручка для постраничного выбора отелей по названию и локации</h2>")
 async def get_hotels(
         pagination: PaginationDep,
         title: str | None = Query(default=None, description="название отеля"),
@@ -36,7 +36,7 @@ async def get_hotels(
 
 
 @router.get("/{hotel_id}",
-            description="<h2>Метод для получения одного отеля по его ID</h2>")
+            description="<h2>Ручка для получения одного отеля по его ID</h2>")
 async def get_hotel(hotel_id: int):
     async with async_session_maker() as session:
         hotel = await HotelsRepo(session).get_one_or_none(id=hotel_id)
@@ -46,7 +46,7 @@ async def get_hotel(hotel_id: int):
 
 @router.post("",
              status_code=HTTP_201_CREATED,
-             description="<h2>Метод для добавления нового отеля</h2>")
+             description="<h2>Ручка для добавления нового отеля</h2>")
 async def create_hotel(hotel: Annotated[HotelAdd, Body(openapi_examples={
                         "normal": {
                             "summary": "Валидные данные",
@@ -75,7 +75,7 @@ async def create_hotel(hotel: Annotated[HotelAdd, Body(openapi_examples={
 
 @router.put("/{hotel_id}",
             status_code=HTTP_204_NO_CONTENT,
-            description="<h2><strong>Полное</strong> редактирование данных об отеле</h2>")
+            description="Ручка для <h2><strong>полного</strong> редактирование данных об отеле</h2>")
 async def update_hotel(hotel_id: int, hotel_data: HotelAdd):
     async with async_session_maker() as session:
         hotel = await HotelsRepo(session).edit(data=hotel_data, id=hotel_id)
@@ -85,7 +85,7 @@ async def update_hotel(hotel_id: int, hotel_data: HotelAdd):
 
 @router.patch("/{hotel_id}",
               status_code=HTTP_204_NO_CONTENT,
-              description="<h2><strong>Частичное</strong> редактирование данных об отеле</h2>")
+              description="Ручка для <h2><strong>частичного</strong> редактирование данных об отеле</h2>")
 async def edit_hotel(hotel_id: int, hotel_data: HotelPATCH):
     async with async_session_maker() as session:
         hotel = await HotelsRepo(session).edit(data=hotel_data, exclude_unset=True, id=hotel_id)
@@ -95,7 +95,7 @@ async def edit_hotel(hotel_id: int, hotel_data: HotelPATCH):
 
 @router.delete("/{hotel_id}",
                status_code=HTTP_204_NO_CONTENT,
-               description="<h2>Метод для удаления отеля по ID</h2>")
+               description="<h2>Ручка для удаления отеля по ID</h2>")
 async def delete_hotel(hotel_id: int):
     async with async_session_maker() as session:
         hotel = await HotelsRepo(session).delete(id=hotel_id)

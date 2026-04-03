@@ -3,6 +3,10 @@ from sqlalchemy import select, insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import Base
+from src.services.exeption_handlers import ExcHandler
+
+
+exc_handler = ExcHandler()  # обработчик исключений
 
 
 class BaseRepository:
@@ -26,9 +30,14 @@ class BaseRepository:
 
     async def add(self, data: BaseModel) -> BaseModel | None:
         add_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
-        result = await self.session.execute(add_stmt)
+        try:
+            result = await self.session.execute(add_stmt)
+        except Exception as err:
+            exc_handler(err)
+
         model = result.scalars().one()
         return self.schema.model_validate(model)
+
 
     async def edit(self, data: BaseModel, exclude_unset=False, **filter_by) -> BaseModel | None:
         update_stmt = (update(self.model)
