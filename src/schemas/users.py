@@ -19,6 +19,11 @@ class UserAdd(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class UserAuth(BaseModel):
+    email: EmailStr
+    password: str
+
+
 class User(BaseModel):
     id: int
     nickname: str
@@ -27,3 +32,7 @@ class User(BaseModel):
     last_name: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserWithHashedPassword(User):
+    hashed_password: str

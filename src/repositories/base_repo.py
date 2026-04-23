@@ -6,9 +6,6 @@ from src.database import Base
 from src.services.exeption_handlers import ExcHandler
 
 
-exc_handler = ExcHandler()  # обработчик исключений
-
-
 class BaseRepository:
     model: Base = None
     schema: BaseModel = None
@@ -33,7 +30,7 @@ class BaseRepository:
         try:
             result = await self.session.execute(add_stmt)
         except Exception as err:
-            exc_handler(err)
+            ExcHandler().handle_exception(err)
 
         model = result.scalars().one()
         return self.schema.model_validate(model)

@@ -34,14 +34,12 @@ async def get_hotels(
         return get_object_or_404(hotels, "hotel")
 
 
-
 @router.get("/{hotel_id}",
             description="<h2>Ручка для получения одного отеля по его ID</h2>")
 async def get_hotel(hotel_id: int):
     async with async_session_maker() as session:
         hotel = await HotelsRepo(session).get_one_or_none(id=hotel_id)
         return get_object_or_404(hotel, "hotel")
-
 
 
 @router.post("",
@@ -75,7 +73,7 @@ async def create_hotel(hotel: Annotated[HotelAdd, Body(openapi_examples={
 
 @router.put("/{hotel_id}",
             status_code=HTTP_204_NO_CONTENT,
-            description="Ручка для <h2><strong>полного</strong> редактирование данных об отеле</h2>")
+            description="<h2>Ручка для <strong>полного</strong> редактирование данных об отеле</h2>")
 async def update_hotel(hotel_id: int, hotel_data: HotelAdd):
     async with async_session_maker() as session:
         hotel = await HotelsRepo(session).edit(data=hotel_data, id=hotel_id)
@@ -85,7 +83,7 @@ async def update_hotel(hotel_id: int, hotel_data: HotelAdd):
 
 @router.patch("/{hotel_id}",
               status_code=HTTP_204_NO_CONTENT,
-              description="Ручка для <h2><strong>частичного</strong> редактирование данных об отеле</h2>")
+              description="<h2>Ручка для <strong>частичного</strong> редактирование данных об отеле</h2>")
 async def edit_hotel(hotel_id: int, hotel_data: HotelPATCH):
     async with async_session_maker() as session:
         hotel = await HotelsRepo(session).edit(data=hotel_data, exclude_unset=True, id=hotel_id)
