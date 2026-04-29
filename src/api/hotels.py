@@ -1,13 +1,13 @@
 from typing import Annotated
 
-from fastapi import Query, Body, APIRouter, HTTPException
-from starlette.status import HTTP_204_NO_CONTENT, HTTP_201_CREATED, HTTP_404_NOT_FOUND
+from fastapi import Query, Body, APIRouter
+from starlette.status import HTTP_204_NO_CONTENT, HTTP_201_CREATED
 
-from src.schemas.hotels import Hotel, HotelAdd, HotelPATCH
+from src.schemas.hotels import HotelAdd, HotelPATCH
 from src.api.dependencies import PaginationDep
 from src.database import async_session_maker
 from src.repositories.hotels_repo import HotelsRepo
-from src.api.utils import get_object_or_404
+from src.services.utils import get_object_or_404
 
 
 router = APIRouter(prefix="/hotels", tags=["Отели",])
@@ -31,7 +31,7 @@ async def get_hotels(
             limit=per_page,
             offset=per_page * (page - 1)
         )
-        return get_object_or_404(hotels, "hotel")
+        return get_object_or_404(hotels)
 
 
 @router.get("/{hotel_id}",
@@ -39,7 +39,7 @@ async def get_hotels(
 async def get_hotel(hotel_id: int):
     async with async_session_maker() as session:
         hotel = await HotelsRepo(session).get_one_or_none(id=hotel_id)
-        return get_object_or_404(hotel, "hotel")
+        return get_object_or_404(hotel)
 
 
 @router.post("",
@@ -66,9 +66,8 @@ async def create_hotel(hotel: Annotated[HotelAdd, Body(openapi_examples={
             ]
         ):
     async with async_session_maker() as session:
-        hotel = await HotelsRepo(session).add(hotel)
+        await HotelsRepo(session).add(hotel)
         await session.commit()
-    return {"status": "OK", "data": hotel}
 
 
 @router.put("/{hotel_id}",
@@ -76,8 +75,7 @@ async def create_hotel(hotel: Annotated[HotelAdd, Body(openapi_examples={
             description="<h2>Ручка для <strong>полного</strong> редактирование данных об отеле</h2>")
 async def update_hotel(hotel_id: int, hotel_data: HotelAdd):
     async with async_session_maker() as session:
-        hotel = await HotelsRepo(session).edit(data=hotel_data, id=hotel_id)
-        get_object_or_404(hotel, "hotel")
+        await HotelsRepo(session).edit(data=hotel_data, id=hotel_id)
         await session.commit()
 
 
@@ -86,8 +84,7 @@ async def update_hotel(hotel_id: int, hotel_data: HotelAdd):
               description="<h2>Ручка для <strong>частичного</strong> редактирование данных об отеле</h2>")
 async def edit_hotel(hotel_id: int, hotel_data: HotelPATCH):
     async with async_session_maker() as session:
-        hotel = await HotelsRepo(session).edit(data=hotel_data, exclude_unset=True, id=hotel_id)
-        get_object_or_404(hotel, "hotel")
+        await HotelsRepo(session).edit(data=hotel_data, exclude_unset=True, id=hotel_id)
         await session.commit()
 
 
@@ -96,6 +93,5 @@ async def edit_hotel(hotel_id: int, hotel_data: HotelPATCH):
                description="<h2>Ручка для удаления отеля по ID</h2>")
 async def delete_hotel(hotel_id: int):
     async with async_session_maker() as session:
-        hotel = await HotelsRepo(session).delete(id=hotel_id)
-        get_object_or_404(hotel, "hotel")
+        await HotelsRepo(session).delete(id=hotel_id)
         await session.commit()

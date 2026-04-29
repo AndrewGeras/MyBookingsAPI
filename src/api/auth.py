@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, HTTPException, Response, Request, Depends
+from fastapi import APIRouter, Body, HTTPException, Response
 from starlette.status import HTTP_201_CREATED, HTTP_401_UNAUTHORIZED, HTTP_204_NO_CONTENT
 
 from src.schemas.users import UserRequestAdd, UserAdd, UserAuth
@@ -58,7 +58,7 @@ async def register_user(user: Annotated[UserRequestAdd, Body(openapi_examples={
     return {"status": "OK", "data": user_data}
 
 
-@router.get("/mпше ыефегыe",
+@router.get("/mе",
             description="<h2>Ручка для получения данных об авторизованном пользователе</h2>")
 async def auth_only(user_id: UserIdDep):
     async with async_session_maker() as session:
