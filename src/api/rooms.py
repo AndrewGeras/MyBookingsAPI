@@ -6,77 +6,64 @@ from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from src.database import async_session_maker
 from src.repositories.rooms_repo import RoomsRepo
 from src.schemas.rooms import RoomsAdd, RoomsPatch, RoomsAddRequest
+from src.utils.examples_data import room_data
+from src.api.dependencies import DBDep
+
 
 router = APIRouter(prefix="/hotels", tags=["Классы номеров отелей"])
 
 
 @router.get("/{hotel_id}/rooms",
             description="<h2>Ручка для получения информации обо всех классах номеров в отеле</h2>")
-async def get_all_rooms(hotel_id: int):
-    async with async_session_maker() as session:
-        rooms = await RoomsRepo(session).get_filtered(hotel_id=hotel_id)
-        return rooms if rooms else {"message": "Свободных номеров в данном отеле нет"}
+async def get_all_rooms(db: DBDep, hotel_id: int):
+    rooms = await db.rooms.get_filtered(hotel_id=hotel_id)
+    return rooms if rooms else {"message": "Свободных номеров в данном отеле нет"}
 
 
 @router.get("/{hotel_id}/rooms/{room_id}",
             description="<h2>Ручка для информации об определённом классу номеров в отеле</h2>")
-async def get_specific_rooms(hotel_id: int, room_id: int):
-    async with async_session_maker() as session:
-        return await RoomsRepo(session).get_one_or_none(hotel_id=hotel_id, id=room_id)
+async def get_specific_rooms(db: DBDep, hotel_id: int, room_id: int):
+    return await db.rooms.get_one_or_none(hotel_id=hotel_id, id=room_id)
 
 
 @router.post("/{hotel_id}/rooms",
              status_code=HTTP_201_CREATED,
              description="<h2>Ручка для добавления информации о классе номеров в отель</h2>")
-async def create_rooms(hotel_id: int,
-                       rooms_data: Annotated[RoomsAddRequest, Body(openapi_examples={
-                           "normal": {
-                               "summary": "Валидные данные",
-                               "description": "Пример **валидных** данных для класса номеров",
-                               "value": {
-                                   "title": "люкс",
-                                   "description": "Лухари пентхаус со шлюхами и Джек Дэниэлзом",
-                                   "price": 99999.99,
-                                   "quantity": 1
-                               }
-                           },
-                       }
-                    )
-               ]
-           ):
+async def create_rooms(db: DBDep,
+                       hotel_id: int,
+                       rooms_data: Annotated[RoomsAddRequest, Body(openapi_examples=room_data)]):
     rooms_data_ = RoomsAdd(hotel_id=hotel_id, **rooms_data.model_dump())
-    async with async_session_maker() as session:
-        await RoomsRepo(session).add(rooms_data_)
-        await session.commit()
+    await db.rooms.add(rooms_data_)
+    await db.commit()
 
 
 @router.put("/{hotel_id}/rooms/{room_id}",
             status_code=HTTP_204_NO_CONTENT,
             description="<h2>Ручка для <strong>полного</strong> изменения информации о классе номеров в отеле</h2>")
-async def update_rooms(hotel_id: int,
+async def update_rooms(db: DBDep,
+                       hotel_id: int,
                        room_id: int,
-                       rooms_data: RoomsAdd):
-    async with async_session_maker() as session:
-        await RoomsRepo(session).edit(data=rooms_data, hotel_id=hotel_id, id=room_id)
-        await session.commit()
+                       rooms_data: RoomsAddRequest):
+    await db.rooms.edit(data=rooms_data, hotel_id=hotel_id, id=room_id)
+    await db.commit()
 
 
 @router.patch("/{hotel_id}/rooms/{room_id}",
             status_code=HTTP_204_NO_CONTENT,
             description="<h2>Ручка для <strong>частичного</strong> изменения информации о классе номеров в отеле</h2>")
-async def edit_rooms(hotel_id: int,
-                       room_id: int,
-                       rooms_data: RoomsPatch):
-    async with async_session_maker() as session:
-        await RoomsRepo(session).edit(data=rooms_data, exclude_unset=True, hotel_id=hotel_id, id=room_id)
-        await session.commit()
+async def edit_rooms(db: DBDep,
+                     hotel_id: int,
+                     room_id: int,
+                     rooms_data: RoomsPatch):
+    await db.rooms.edit(data=rooms_data, exclude_unset=True, hotel_id=hotel_id, id=room_id)
+    await db.commit()
 
 
 @router.delete("/{hotel_id}/rooms/{room_id}",
             status_code=HTTP_204_NO_CONTENT,
             description="<h2>Ручка для удаления информации о классе номеров в отеле</h2>")
-async def delete_rooms(hotel_id: int,
+async def delete_rooms(db: DBDep,
+                       hotel_id: int,
                        room_id: int):
-    async with async_session_maker() as session:
-        await RoomsRepo(session).delete(hotel_id=hotel_id, id=room_id)
-        await session.commit()
+    await db.rooms.delete(hotel_id=hotel_id, id=room_id)
+    await db.commit()

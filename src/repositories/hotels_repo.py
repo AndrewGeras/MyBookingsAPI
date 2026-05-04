@@ -1,10 +1,9 @@
-from fastapi.exceptions import HTTPException
-from starlette.status import HTTP_404_NOT_FOUND
 from sqlalchemy import select
 
 from src.repositories.base_repo import BaseRepository
 from src.models.hotels import HotelsORM
 from src.schemas.hotels import Hotel
+from src.utils.handlers import get_object_or_404
 
 
 class HotelsRepo(BaseRepository):
@@ -32,8 +31,9 @@ class HotelsRepo(BaseRepository):
 
         print(query.compile(compile_kwargs={"literal_binds": True}))
 
-        query_result = await self.session.execute(query)
-        hotels = [self.schema.model_validate(model, from_attributes=True) for model in query_result.scalars().all()]
+        query_result = await self.session.scalars(query)
+
+        hotels = [self.schema.model_validate(model, from_attributes=True) for model in
+                  get_object_or_404(query_result.all())]
 
         return hotels
-

@@ -16,4 +16,3 @@ class UsersRepo(BaseRepository):
         model = query_result.one_or_none()
         if model:
             return UserWithHashedPassword.model_validate(model)
-

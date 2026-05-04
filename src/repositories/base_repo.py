@@ -3,8 +3,7 @@ from sqlalchemy import select, insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import Base
-from src.services.exeption_handlers import ExcHandler
-from src.services.utils import get_object_or_404
+from src.utils.handlers import ExcHandler, get_object_or_404
 
 
 class BaseRepository:
