@@ -27,7 +27,7 @@ class BaseRepository:
         model = query_result.one_or_none()
         return self.schema.model_validate(get_object_or_404(model))
 
-    async def add(self, data: BaseModel, *args, **kwargs) -> BaseModel | None:
+    async def add(self, data: BaseModel) -> BaseModel | None:
         add_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
         try:
             result = await self.session.execute(add_stmt)
