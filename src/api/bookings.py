@@ -8,7 +8,19 @@ from src.schemas.bookings import BookingsAdd, BookingAddRequest
 router = APIRouter(prefix="/bookings", tags=["Бронирования"])
 
 
-@router.post("/{room_id}",
+@router.get("",
+            description="<h2>Ручка для получения всех бронирований</h2>")
+async def get_all_bookings(db: DBDep):
+    return await db.bookings.get_all()
+
+
+@router.get("/me",
+            description="<h2>Ручка для получения пользовательских бронирований</h2>")
+async def get_my_bookings(db: DBDep, user_id: UserIdDep):
+    return await db.bookings.get_filtered(user_id=user_id)
+
+
+@router.post("",
              status_code=HTTP_201_CREATED,
              description="<h2>Ручка для добавления бронирования номера в отеле</h2>")
 async def book_room(db: DBDep,

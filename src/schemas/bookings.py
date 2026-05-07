@@ -15,3 +15,7 @@ class BookingAddRequest(BaseModel):
 class BookingsAdd(BookingAddRequest):
     user_id: int
     price: Decimal
+
+
+class Bookings(BookingsAdd):
+    id: int

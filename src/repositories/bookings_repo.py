@@ -7,12 +7,12 @@ from fastapi.exceptions import HTTPException
 
 from src.repositories.base_repo import BaseRepository
 from src.models.bookings import BookingsORM
-from src.schemas.bookings import BookingsAdd, BookingAddRequest
+from src.schemas.bookings import Bookings, BookingsAdd, BookingAddRequest
 
 
 class BookingsRepo(BaseRepository):
     model = BookingsORM
-    schema = BookingsAdd
+    schema = Bookings
 
     async def check_booked_rooms(self, book_req: BookingsAdd):
         room_id = book_req.room_id

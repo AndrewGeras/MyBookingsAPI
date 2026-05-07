@@ -21,9 +21,9 @@ async def register_user(db: DBDep, user: Annotated[UserRequestAdd, Body(openapi_
                        first_name=user.first_name,
                        last_name=user.last_name)
 
-    await db.users.add(new_user)
+    user_data = await db.users.add(new_user)
     await db.commit()
-    return {"status": "success", "message": "Пользователь зарегистрирован"}
+    return {"status": "success", "message": "Пользователь зарегистрирован", "details": user_data}
 
 
 @router.post("/login",
@@ -39,7 +39,7 @@ async def login(db: DBDep, user_data: UserAuth,
                             detail="Неверный пароль")
     access_token = AuthService().create_access_token({"user_id": user.id})
     response.set_cookie("access_token", access_token)
-    return {"message": "доступ разрешён"}
+    return {"message": "доступ разрешён", "user_data": user_data}
 
 
 @router.get("/mе",
