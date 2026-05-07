@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict
@@ -19,3 +19,4 @@ class BookingsAdd(BookingAddRequest):
 
 class Bookings(BookingsAdd):
     id: int
+    create_at: datetime

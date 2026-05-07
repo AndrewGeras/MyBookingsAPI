@@ -1,8 +1,8 @@
 from decimal import Decimal
-from datetime import date
+from datetime import date, datetime
 
 from sqlalchemy.orm import mapped_column, Mapped, validates
-from sqlalchemy import ForeignKey, Numeric
+from sqlalchemy import ForeignKey, Numeric, text
 from sqlalchemy.schema import CheckConstraint
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -19,6 +19,7 @@ class BookingsORM(Base):
     date_from: Mapped[date]
     date_to: Mapped[date]
     price: Mapped[Decimal] = mapped_column(Numeric(precision=8, scale=2))
+    create_at: Mapped[datetime] = mapped_column(server_default=text("TIMEZONE('utc', now())"))
 
     @hybrid_property
     def total_cost(self) -> Decimal:

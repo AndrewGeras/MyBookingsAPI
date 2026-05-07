@@ -27,6 +27,12 @@ def upgrade() -> None:
         sa.Column("date_from", sa.Date(), nullable=False),
         sa.Column("date_to", sa.Date(), nullable=False),
         sa.Column("price", sa.Numeric(precision=8, scale=2), nullable=False),
+        sa.Column(
+            "create_at",
+            sa.DateTime(),
+            server_default=sa.text("TIMEZONE('utc', now())"),
+            nullable=False,
+        ),
         sa.CheckConstraint("date_to > date_from", name="check_booking_duration"),
         sa.ForeignKeyConstraint(
             ["room_id"],

@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Body, HTTPException, Response
 from starlette.status import HTTP_201_CREATED, HTTP_401_UNAUTHORIZED, HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND
 
-from src.schemas.users import UserRequestAdd, UserAdd, UserAuth
+from src.schemas.users import UserRequestAdd, UserAdd, UserAuth, User
 from src.services.auth import AuthService
 from src.api.dependencies import UserIdDep, DBDep
 from src.utils.examples_data import user_example
@@ -39,7 +39,7 @@ async def login(db: DBDep, user_data: UserAuth,
                             detail="Неверный пароль")
     access_token = AuthService().create_access_token({"user_id": user.id})
     response.set_cookie("access_token", access_token)
-    return {"message": "доступ разрешён", "user_data": user_data}
+    return {"message": "доступ разрешён", "user_data": User(**user.model_dump())}
 
 
 @router.get("/mе",
