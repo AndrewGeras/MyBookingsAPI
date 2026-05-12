@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Annotated
 
 from fastapi import Query, Body, APIRouter
@@ -10,8 +11,8 @@ from src.utils.examples_data import hotel_example
 router = APIRouter(prefix="/hotels", tags=["Отели", ])
 
 
-@router.get("",
-            description="<h2>Ручка для постраничного выбора отелей по названию и локации</h2>")
+# @router.get("",
+#             description="<h2>Ручка для постраничного выбора отелей по названию и локации</h2>")
 async def get_hotels(
         db: DBDep,
         pagination: PaginationDep,
@@ -25,6 +26,20 @@ async def get_hotels(
                                      location=location,
                                      limit=per_page,
                                      offset=per_page * (page - 1))
+    return hotels
+
+
+@router.get("",
+            description="<h2>Ручка для получения информации об отелях с номерами, доступными для бронирования</h2>")
+async def get_available_hotels(
+        db: DBDep,
+        # pagination: PaginationDep,
+        date_from: date = Query(description="дата заезда", example="2026-05-07"),
+        date_to: date = Query(description="дата выезда", example="2026-05-10"),
+        # title: str | None = Query(default=None, description="название отеля"),
+        # location: str | None = Query(default=None, description="локация отеля")
+):
+    hotels = await db.hotels.get_available(date_from, date_to)
     return hotels
 
 

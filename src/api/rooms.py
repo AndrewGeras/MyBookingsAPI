@@ -1,22 +1,23 @@
 from typing import Annotated
+from datetime import date
 
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, Query
 from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
-from src.database import async_session_maker
-from src.repositories.rooms_repo import RoomsRepo
 from src.schemas.rooms import RoomsAdd, RoomsPatch, RoomsAddRequest
 from src.utils.examples_data import room_data
 from src.api.dependencies import DBDep
-
 
 router = APIRouter(prefix="/hotels", tags=["Классы номеров отелей"])
 
 
 @router.get("/{hotel_id}/rooms",
-            description="<h2>Ручка для получения информации обо всех классах номеров в отеле</h2>")
-async def get_all_rooms(db: DBDep, hotel_id: int):
-    rooms = await db.rooms.get_filtered(hotel_id=hotel_id)
+            description="<h2>Ручка для получения информации обо всех классах номеров, доступных для бронирования в отеле</h2>")
+async def get_all_rooms(db: DBDep,
+                        hotel_id: int,
+                        date_from: Annotated[date, Query(example="2026-05-08")],
+                        date_to: Annotated[date, Query(example="2026-05-10")]):
+    rooms = await db.rooms.get_available(hotel_id=hotel_id, date_from=date_from, date_to=date_to)
     return rooms if rooms else {"message": "Свободных номеров в данном отеле нет"}
 
 
@@ -49,8 +50,8 @@ async def update_rooms(db: DBDep,
 
 
 @router.patch("/{hotel_id}/rooms/{room_id}",
-            status_code=HTTP_204_NO_CONTENT,
-            description="<h2>Ручка для <strong>частичного</strong> изменения информации о классе номеров в отеле</h2>")
+              status_code=HTTP_204_NO_CONTENT,
+              description="<h2>Ручка для <strong>частичного</strong> изменения информации о классе номеров в отеле</h2>")
 async def edit_rooms(db: DBDep,
                      hotel_id: int,
                      room_id: int,
@@ -60,8 +61,8 @@ async def edit_rooms(db: DBDep,
 
 
 @router.delete("/{hotel_id}/rooms/{room_id}",
-            status_code=HTTP_204_NO_CONTENT,
-            description="<h2>Ручка для удаления информации о классе номеров в отеле</h2>")
+               status_code=HTTP_204_NO_CONTENT,
+               description="<h2>Ручка для удаления информации о классе номеров в отеле</h2>")
 async def delete_rooms(db: DBDep,
                        hotel_id: int,
                        room_id: int):

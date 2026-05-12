@@ -8,6 +8,8 @@ class RoomsAddRequest(BaseModel):
     price: Decimal
     quantity: int
 
+    model_config = ConfigDict(from_attributes=True)
+
 
 class RoomsAdd(RoomsAddRequest):
     hotel_id: int
@@ -22,6 +24,13 @@ class RoomsPatch(BaseModel):
 
 class Rooms(RoomsAdd):
     id: int
-    hotel_id: int
+
+
+class AvailableRooms(BaseModel):
+    room_id: int
+    title: str
+    description: str | None
+    price: Decimal
+    available_rooms: int
 
     model_config = ConfigDict(from_attributes=True)

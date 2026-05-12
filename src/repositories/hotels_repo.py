@@ -1,8 +1,12 @@
+from datetime import date
+
 from sqlalchemy import select
+from pydantic import BaseModel
 
 from src.repositories.base_repo import BaseRepository
+from src.repositories.utils import get_available_by_date
 from src.models.hotels import HotelsORM
-from src.schemas.hotels import Hotel
+from src.schemas.hotels import Hotel, AvailableHotels
 from src.utils.handlers import get_object_or_404
 
 
@@ -37,3 +41,11 @@ class HotelsRepo(BaseRepository):
                   get_object_or_404(query_result.all())]
 
         return hotels
+
+
+    async def get_available(self,
+                            date_from: date,
+                            date_to: date) -> [BaseModel]:
+        query_result = await self.session.execute(get_available_by_date(date_from, date_to))
+
+        return [AvailableHotels.model_validate(room) for room in query_result]
