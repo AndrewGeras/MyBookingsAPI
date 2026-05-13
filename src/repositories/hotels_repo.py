@@ -44,8 +44,32 @@ class HotelsRepo(BaseRepository):
 
 
     async def get_available(self,
+                            title: str,
+                            location: str,
+                            limit: int,
+                            offset: int,
                             date_from: date,
                             date_to: date) -> [BaseModel]:
-        query_result = await self.session.execute(get_available_by_date(date_from, date_to))
+        hotels = select(self.model).cte("hotels")
+        if title:
+            hotels = select(self.model).where(self.model.title.ilike(f"%{title.strip()}%")).cte("hotels")
+        if location:
+            hotels = select(self.model).where(self.model.location.ilike(f"%{location.strip()}%")).cte("hotels")
 
+        available_hotels = (get_available_by_date(date_from, date_to).cte("available_hotels"))
+
+        query = (select(available_hotels,
+                        hotels.c.title.label("hotel"),
+                        hotels.c.location)
+                 .select_from(available_hotels)
+                 .join(hotels, hotels.c.id == available_hotels.c.hotel_id)
+                 .order_by(available_hotels.c.hotel_id, available_hotels.c.price))
+
+        query = (
+            query
+            .limit(limit)
+            .offset(offset)
+        )
+
+        query_result = await self.session.execute(query)
         return [AvailableHotels.model_validate(room) for room in query_result]

@@ -20,6 +20,8 @@ class HotelPATCH(BaseModel):
 
 class AvailableHotels(BaseModel):
     hotel_id: int
+    hotel: str
+    location: str
     room_id: int
     title: str
     description: str | None
