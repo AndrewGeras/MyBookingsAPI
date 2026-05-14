@@ -19,13 +19,10 @@ class HotelPATCH(BaseModel):
 
 
 class AvailableHotels(BaseModel):
-    hotel_id: int
-    hotel: str
-    location: str
-    room_id: int
+    id: int
     title: str
-    description: str | None
-    price: Decimal
+    location: str
+    price_from: Decimal
     available_rooms: int
 
     model_config = ConfigDict(from_attributes=True)

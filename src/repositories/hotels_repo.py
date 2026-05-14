@@ -1,6 +1,6 @@
 from datetime import date
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from pydantic import BaseModel
 
 from src.repositories.base_repo import BaseRepository
@@ -56,20 +56,15 @@ class HotelsRepo(BaseRepository):
         if location:
             hotels = select(self.model).where(self.model.location.ilike(f"%{location.strip()}%")).cte("hotels")
 
-        available_hotels = (get_available_by_date(date_from, date_to).cte("available_hotels"))
+        available_rooms_at_hotel = (get_available_by_date(date_from, date_to).cte("available_rooms_at_hotel"))
 
-        query = (select(available_hotels,
-                        hotels.c.title.label("hotel"),
-                        hotels.c.location)
-                 .select_from(available_hotels)
-                 .join(hotels, hotels.c.id == available_hotels.c.hotel_id)
-                 .order_by(available_hotels.c.hotel_id, available_hotels.c.price))
-
-        query = (
-            query
-            .limit(limit)
-            .offset(offset)
-        )
-
+        query = (select(hotels,
+                        func.sum(available_rooms_at_hotel.c.available_rooms).label("available_rooms"),
+                        func.min(available_rooms_at_hotel.c.price).label("price_from"))
+                 .select_from(hotels)
+                 .join(available_rooms_at_hotel, hotels.c.id == available_rooms_at_hotel.c.hotel_id)
+                 .group_by(hotels)
+                 .limit(limit)
+                 .offset(offset))
         query_result = await self.session.execute(query)
-        return [AvailableHotels.model_validate(room) for room in query_result]
+        return [AvailableHotels.model_validate(hotel) for hotel in query_result]
