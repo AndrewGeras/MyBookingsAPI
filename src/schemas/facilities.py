@@ -8,3 +8,12 @@ class FacilityAdd(BaseModel):
 
 class Facility(FacilityAdd):
     id: int
+
+
+class RoomFacilitiesAdd(BaseModel):
+    room_id: int
+    facility_id: int
+
+
+class RoomFacilities(RoomFacilitiesAdd):
+    id: int

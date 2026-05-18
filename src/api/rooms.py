@@ -5,6 +5,7 @@ from fastapi import APIRouter, Body, Query
 from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from src.schemas.rooms import RoomsAdd, RoomsPatch, RoomsAddRequest
+from src.schemas.facilities import RoomFacilitiesAdd
 from src.utils.examples_data import room_data
 from src.api.dependencies import DBDep
 
@@ -34,8 +35,13 @@ async def create_rooms(db: DBDep,
                        hotel_id: int,
                        rooms_data: Annotated[RoomsAddRequest, Body(openapi_examples=room_data)]):
     rooms_data_ = RoomsAdd(hotel_id=hotel_id, **rooms_data.model_dump())
-    await db.rooms.add(rooms_data_)
+    room = await db.rooms.add(rooms_data_)
+
+    room_facilities_data = [RoomFacilitiesAdd(room_id=room.id, facility_id=f_id) for f_id in rooms_data.facilities_ids]
+
+    await db.room_facilities.add_bulk(room_facilities_data)
     await db.commit()
+    return {"status": "OK", "details": room}
 
 
 @router.put("/{hotel_id}/rooms/{room_id}",

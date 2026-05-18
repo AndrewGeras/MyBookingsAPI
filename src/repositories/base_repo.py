@@ -31,10 +31,17 @@ class BaseRepository:
         add_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
         try:
             result = await self.session.execute(add_stmt)
+            model = result.scalars().one()
+            return self.schema.model_validate(model)
         except Exception as err:
             ExcHandler().handle_exception(err)
-        model = result.scalars().one()
-        return self.schema.model_validate(model)
+
+    async def add_bulk(self, bulk_data: list[BaseModel]):
+        add_stmt = insert(self.model).values([item.model_dump() for item in bulk_data])
+        try:
+            await self.session.execute(add_stmt)
+        except Exception as err:
+            ExcHandler().handle_exception(err)
 
     async def edit(self, data: BaseModel, exclude_unset=False, **filter_by) -> BaseModel | None:
         update_stmt = (update(self.model)
