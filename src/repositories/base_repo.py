@@ -48,6 +48,7 @@ class BaseRepository:
                        .filter_by(**filter_by)
                        .values(**data.model_dump(exclude_unset=exclude_unset))
                        .returning(self.model))
+        print(update_stmt.compile(compile_kwargs={"literal_binds": True}))
         result = await self.session.execute(update_stmt)
         model = result.scalars().one_or_none()
         return self.schema.model_validate(get_object_or_404(model))
@@ -59,3 +60,11 @@ class BaseRepository:
         result = await self.session.execute(delete_stmt)
         model = result.scalars().one_or_none()
         return self.schema.model_validate(get_object_or_404(model))
+
+    async def delete_bulk(self, **filter_by) -> list[BaseModel]:
+        delete_stmt = (delete(self.model)
+                       .filter_by(**filter_by)
+                       .returning(self.model))
+        result = await self.session.execute(delete_stmt)
+        models = result.scalars().all()
+        return [self.schema.model_validate(get_object_or_404(model)) for model in models]

@@ -14,6 +14,8 @@ class RoomFacilitiesAdd(BaseModel):
     room_id: int
     facility_id: int
 
+    model_config = ConfigDict(from_attributes=True)
+
 
 class RoomFacilities(RoomFacilitiesAdd):
     id: int

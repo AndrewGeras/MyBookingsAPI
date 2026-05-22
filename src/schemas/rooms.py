@@ -26,6 +26,12 @@ class RoomsPatch(BaseModel):
     price: Decimal | None = None
     quantity: int | None = None
 
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RoomsPatchRequest(RoomsPatch):
+    facilities_ids: list[int] | None = None
+
 
 class Rooms(RoomsAdd):
     id: int

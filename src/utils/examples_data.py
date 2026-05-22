@@ -47,7 +47,8 @@ room_data = {
             "title": "люкс",
             "description": "Лухари пентхаус со шлюхами и Джек Дэниэлзом",
             "price": 99999.99,
-            "quantity": 1
+            "quantity": 1,
+            "facilities_ids": []
         }
     },
 }
