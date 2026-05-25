@@ -4,7 +4,7 @@ from datetime import date
 from fastapi import APIRouter, Body, Query
 from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
-from src.schemas.rooms import RoomsAdd, RoomsPatch, RoomsAddRequest, RoomsPatchRequest
+from src.schemas.rooms import RoomsAdd, RoomsAddRequest, RoomsPatch, RoomsPatchRequest
 from src.schemas.facilities import RoomFacilitiesAdd
 from src.utils.examples_data import room_data
 from src.api.dependencies import DBDep
@@ -47,39 +47,34 @@ async def create_rooms(db: DBDep,
 
 
 @router.put("/{hotel_id}/rooms/{room_id}",
+            status_code=HTTP_204_NO_CONTENT,
             description="<h2>Ручка для <strong>полного</strong> изменения информации о классе номеров в отеле</h2>")
 async def update_rooms(db: DBDep,
                        hotel_id: int,
                        room_id: int,
-                       room_data: RoomsAddRequest):
-    room_data_ = RoomsAdd(hotel_id=hotel_id, **room_data.model_dump())
-    updated_room_data = await db.rooms.edit(id=room_id, data=room_data_)
-
-    upd_facilities = await db.room_facilities.upsert_or_delete(room_id=room_id, facilities=room_data.facilities_ids)
-
+                       rooms_data: RoomsAddRequest):
+    await db.rooms.edit(data=RoomsAdd(hotel_id=hotel_id,
+                                      **rooms_data.model_dump()),
+                        id=room_id)
+    await db.room_facilities.upsert_or_delete(room_id=room_id,
+                                              facilities_ids=rooms_data.facilities_ids)
     await db.commit()
-
-    return {"status": "success", "details": {"room_data": updated_room_data,
-                                             "upd_facilities": upd_facilities}}
 
 
 @router.patch("/{hotel_id}/rooms/{room_id}",
+              status_code=HTTP_204_NO_CONTENT,
               description="<h2>Ручка для <strong>частичного</strong> изменения информации о классе номеров в отеле</h2>")
 async def edit_rooms(db: DBDep,
                      hotel_id: int,
                      room_id: int,
-                     room_data: RoomsPatchRequest):
-    room_data_ = RoomsPatch(**room_data.model_dump(exclude_none=True))
-    patched_room_data = {}
-    if room_data_.model_dump(exclude_none=True).values():   # Проверка, поступили ли изменения для модели RoomsORM
-        patched_room_data = await db.rooms.edit(data=room_data_, exclude_unset=True, hotel_id=hotel_id, id=room_id)
-
-    upd_facilities = await db.room_facilities.upsert_or_delete(room_id=room_id, facilities=room_data.facilities_ids)
-
+                     rooms_data: RoomsPatchRequest):
+    await db.rooms.edit(RoomsPatch(hotel_id=hotel_id,
+                                   **rooms_data.model_dump(exclude_none=True)),
+                        exclude_unset=True,
+                        id=room_id)
+    await db.room_facilities.upsert_or_delete(room_id=room_id,
+                                              facilities_ids=rooms_data.facilities_ids)
     await db.commit()
-    return {"status": "success", "details": {"room_data": patched_room_data,
-                                             "upd_facilities": upd_facilities
-                                             }}
 
 
 @router.delete("/{hotel_id}/rooms/{room_id}",
