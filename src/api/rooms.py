@@ -4,7 +4,7 @@ from datetime import date
 from fastapi import APIRouter, Body, Query
 from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
-from src.schemas.rooms import RoomsAdd, RoomsPatch, RoomsAddRequest
+from src.schemas.rooms import RoomsAdd, RoomsAddRequest, RoomsPatch, RoomsPatchRequest
 from src.schemas.facilities import RoomFacilitiesAdd
 from src.utils.examples_data import room_data
 from src.api.dependencies import DBDep
@@ -51,7 +51,11 @@ async def update_rooms(db: DBDep,
                        hotel_id: int,
                        room_id: int,
                        rooms_data: RoomsAddRequest):
-    await db.rooms.edit(data=rooms_data, hotel_id=hotel_id, id=room_id)
+    await db.rooms.edit(data=RoomsAdd(hotel_id=hotel_id,
+                                      **rooms_data.model_dump()),
+                        id=room_id)
+    await db.room_facilities.upset_or_delete_facilities(room_id=room_id,
+                                                        facilities_ids=rooms_data.facilities_ids)
     await db.commit()
 
 
@@ -61,8 +65,13 @@ async def update_rooms(db: DBDep,
 async def edit_rooms(db: DBDep,
                      hotel_id: int,
                      room_id: int,
-                     rooms_data: RoomsPatch):
-    await db.rooms.edit(data=rooms_data, exclude_unset=True, hotel_id=hotel_id, id=room_id)
+                     rooms_data: RoomsPatchRequest):
+    await db.rooms.edit(RoomsPatch(hotel_id=hotel_id,
+                                   **rooms_data.model_dump(exclude_none=True)),
+                        exclude_unset=True,
+                        id=room_id)
+    await db.room_facilities.upset_or_delete_facilities(room_id=room_id,
+                                                        facilities_ids=rooms_data.facilities_ids)
     await db.commit()
 
 

@@ -7,7 +7,7 @@ class RoomsAddRequest(BaseModel):
     description: str | None = None
     price: Decimal
     quantity: int
-    facilities_ids: list[int] | None = None
+    facilities_ids: list[int] = []
 
 
 class RoomsAdd(BaseModel):
@@ -20,7 +20,16 @@ class RoomsAdd(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class RoomsPatchRequest(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    price: Decimal | None = None
+    quantity: int | None = None
+    facilities_ids: list[int] = []
+
+
 class RoomsPatch(BaseModel):
+    hotel_id: int
     title: str | None = None
     description: str | None = None
     price: Decimal | None = None
