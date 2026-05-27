@@ -1,5 +1,8 @@
 from decimal import Decimal
+
 from pydantic import BaseModel, ConfigDict
+
+from src.schemas.facilities import Facility
 
 
 class RoomsAddRequest(BaseModel):
@@ -38,15 +41,12 @@ class RoomsPatch(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class Rooms(RoomsAdd):
+class Rooms(BaseModel):
     id: int
-
-
-class AvailableRooms(BaseModel):
-    room_id: int
     title: str
     description: str | None
     price: Decimal
+    facilities: list[Facility]
     available_rooms: int
 
     model_config = ConfigDict(from_attributes=True)

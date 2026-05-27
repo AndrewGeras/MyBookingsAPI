@@ -15,6 +15,9 @@ class BaseRepository:
 
     async def get_filtered(self, **filters) -> [BaseModel]:
         query = select(self.model).filter_by(**filters)
+
+        # print(query.compile(compile_kwargs={"literal_binds": True}))
+
         query_result = await self.session.scalars(query)
         return [self.schema.model_validate(model) for model in get_object_or_404(query_result.all())]
 

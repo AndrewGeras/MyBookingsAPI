@@ -33,15 +33,12 @@ class HotelsRepo(BaseRepository):
             .offset(offset)
         )
 
-        print(query.compile(compile_kwargs={"literal_binds": True}))
-
         query_result = await self.session.scalars(query)
 
         hotels = [self.schema.model_validate(model, from_attributes=True) for model in
                   get_object_or_404(query_result.all())]
 
         return hotels
-
 
     async def get_available(self,
                             title: str,
