@@ -8,7 +8,8 @@ from sqlalchemy.orm import selectinload
 from src.repositories.base_repo import BaseRepository
 from src.repositories.utils import get_available_by_date
 from src.models.rooms import RoomsORM
-from src.schemas.rooms import Rooms
+from src.schemas.rooms import Rooms, RoomsAvailable
+from src.utils.handlers import get_object_or_404
 
 
 class RoomsRepo(BaseRepository):
@@ -34,4 +35,12 @@ class RoomsRepo(BaseRepository):
                                  (("available_rooms", available_rooms),))
                            for room, available_rooms in query_result.unique())
 
-        return [self.schema.model_validate(dict(room_data)) for room_data in result_iterator]
+        return [RoomsAvailable.model_validate(dict(room_data)) for room_data in result_iterator]
+
+    async def get_one_or_none(self, **filters) -> BaseModel | None:
+        query = (select(self.model)
+                 .options(selectinload(self.model.facilities))
+                 .filter_by(**filters))
+        query_result = await self.session.scalars(query)
+        model = query_result.one_or_none()
+        return self.schema.model_validate(get_object_or_404(model))

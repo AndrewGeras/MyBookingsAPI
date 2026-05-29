@@ -47,6 +47,9 @@ class Rooms(BaseModel):
     description: str | None
     price: Decimal
     facilities: list[Facility]
-    available_rooms: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class RoomsAvailable(Rooms):
+    available_rooms: int
