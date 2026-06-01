@@ -11,7 +11,7 @@ from src.schemas.bookings import Booking
 from src.schemas.facilities import Facility, RoomFacility
 
 
-class HotelMapper(DataMapper):
+class HotelMapper(DataMapper[HotelsORM, Hotel]):
     db_model = HotelsORM
     schema = Hotel
 
@@ -20,7 +20,7 @@ class AvailableHotelMapper(HotelMapper):
     schema = AvailableHotel
 
 
-class RoomMapper(DataMapper):
+class RoomMapper(DataMapper[RoomsORM, Room]):
     db_model = RoomsORM
     schema = Room
 
@@ -29,7 +29,7 @@ class RoomAvailableMapper(RoomMapper):
     schema = RoomAvailable
 
 
-class UserMapper(DataMapper):
+class UserMapper(DataMapper[UsersORM, User]):
     db_model = UsersORM
     schema = User
 
@@ -38,16 +38,16 @@ class UserWithHashedPasswordMapper(UserMapper):
     schema = UserWithHashedPassword
 
 
-class BookingMapper(DataMapper):
+class BookingMapper(DataMapper[BookingsORM, Booking]):
     db_model = BookingsORM
     schema = Booking
 
 
-class FacilityMapper(DataMapper):
+class FacilityMapper(DataMapper[FacilitiesORM, Facility]):
     db_model = FacilitiesORM
     schema = Facility
 
 
-class RoomFacilityMapper(DataMapper):
+class RoomFacilityMapper(DataMapper[RoomFacilitiesORM, RoomFacility]):
     db_model = RoomFacilitiesORM
     schema = RoomFacility
