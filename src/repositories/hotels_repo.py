@@ -4,15 +4,15 @@ from sqlalchemy import select, func
 from pydantic import BaseModel
 
 from src.repositories.base_repo import BaseRepository
+from src.repositories.mappers.mappers import AvailableHotelMapper, HotelMapper
 from src.repositories.utils import get_available_by_date
 from src.models.hotels import HotelsORM
-from src.schemas.hotels import Hotel, AvailableHotels
 from src.utils.handlers import get_object_or_404
 
 
 class HotelsRepo(BaseRepository):
     model = HotelsORM
-    schema = Hotel
+    mapper = HotelMapper
 
     async def get_all(
             self,
@@ -35,7 +35,7 @@ class HotelsRepo(BaseRepository):
 
         query_result = await self.session.scalars(query)
 
-        hotels = [self.schema.model_validate(model, from_attributes=True) for model in
+        hotels = [self.mapper.map_to_domain_entity(model) for model in
                   get_object_or_404(query_result.all())]
 
         return hotels
@@ -64,4 +64,4 @@ class HotelsRepo(BaseRepository):
                  .limit(limit)
                  .offset(offset))
         query_result = await self.session.execute(query)
-        return [AvailableHotels.model_validate(hotel) for hotel in query_result]
+        return [AvailableHotelMapper.map_to_domain_entity(hotel) for hotel in query_result.all()]

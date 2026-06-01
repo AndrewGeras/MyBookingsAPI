@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 
 class BookingAddRequest(BaseModel):
@@ -9,14 +9,12 @@ class BookingAddRequest(BaseModel):
     date_from: date
     date_to: date
 
-    model_config = ConfigDict(from_attributes=True)
 
-
-class BookingsAdd(BookingAddRequest):
+class BookingAdd(BookingAddRequest):
     user_id: int
     price: Decimal
 
 
-class Bookings(BookingsAdd):
+class Booking(BookingAdd):
     id: int
     create_at: datetime

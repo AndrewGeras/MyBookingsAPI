@@ -16,7 +16,7 @@ def get_available_by_date(date_from: date,
                         .group_by(BookingsORM.room_id)
                         .cte("booked_rooms"))
 
-    available_rooms_cte = (select(RoomsORM.id,
+    available_rooms_cte = (select(RoomsORM,
                                   (RoomsORM.quantity - func.coalesce(booked_rooms_cte.c.rooms_count, 0))
                                   .label("available_rooms"))
                            .select_from(RoomsORM)

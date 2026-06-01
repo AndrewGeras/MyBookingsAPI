@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 
 class HotelAdd(BaseModel):
@@ -10,7 +10,6 @@ class HotelAdd(BaseModel):
 
 class Hotel(HotelAdd):
     id: int
-    model_config = ConfigDict(from_attributes=True)
 
 
 class HotelPATCH(BaseModel):
@@ -18,11 +17,9 @@ class HotelPATCH(BaseModel):
     location: str | None = None
 
 
-class AvailableHotels(BaseModel):
+class AvailableHotel(BaseModel):
     id: int
     title: str
     location: str
     price_from: Decimal
     available_rooms: int
-
-    model_config = ConfigDict(from_attributes=True)

@@ -6,15 +6,15 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.repositories.base_repo import BaseRepository
+from src.repositories.mappers.mappers import RoomMapper, RoomAvailableMapper
 from src.repositories.utils import get_available_by_date
 from src.models.rooms import RoomsORM
-from src.schemas.rooms import Rooms, RoomsAvailable
 from src.utils.handlers import get_object_or_404
 
 
 class RoomsRepo(BaseRepository):
     model = RoomsORM
-    schema = Rooms
+    mapper = RoomMapper
 
     async def get_available(self,
                             hotel_id: int,
@@ -35,7 +35,7 @@ class RoomsRepo(BaseRepository):
                                  (("available_rooms", available_rooms),))
                            for room, available_rooms in query_result.unique())
 
-        return [RoomsAvailable.model_validate(dict(room_data)) for room_data in result_iterator]
+        return [RoomAvailableMapper.map_to_domain_entity(dict(room_data)) for room_data in result_iterator]
 
     async def get_one_or_none(self, **filters) -> BaseModel | None:
         query = (select(self.model)
@@ -43,4 +43,4 @@ class RoomsRepo(BaseRepository):
                  .filter_by(**filters))
         query_result = await self.session.scalars(query)
         model = query_result.one_or_none()
-        return self.schema.model_validate(get_object_or_404(model))
+        return self.mapper.map_to_domain_entity(get_object_or_404(model))

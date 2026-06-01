@@ -3,17 +3,17 @@ from sqlalchemy.dialects.postgresql import insert
 
 from src.repositories.base_repo import BaseRepository
 from src.models.facilities import FacilitiesORM, RoomFacilitiesORM
-from src.schemas.facilities import Facility, RoomFacilities
+from src.repositories.mappers.mappers import FacilityMapper, RoomFacilityMapper
 
 
 class FacilitiesRepo(BaseRepository):
     model = FacilitiesORM
-    schema = Facility
+    mapper = FacilityMapper
 
 
 class RoomFacilityRepo(BaseRepository):
     model = RoomFacilitiesORM
-    schema = RoomFacilities
+    mapper = RoomFacilityMapper
 
     async def upsert_or_delete(self, room_id: int, facilities_ids: list[int]):
 

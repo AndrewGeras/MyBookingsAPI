@@ -15,7 +15,8 @@ def get_object_or_404(obj: BaseModel | Sequence | None):
 
 class ExcHandler:
 
-    def handle_exception(self, exc: Exception):
+    @classmethod
+    def handle_exception(cls, exc: Exception):
         if isinstance(exc, IntegrityError):
             if isinstance(exc.orig, Error):
                 message = exc.orig.diag.message_detail

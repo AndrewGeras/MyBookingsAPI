@@ -1,11 +1,11 @@
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 from src.schemas.facilities import Facility
 
 
-class RoomsAddRequest(BaseModel):
+class RoomAddRequest(BaseModel):
     title: str
     description: str | None = None
     price: Decimal
@@ -13,17 +13,15 @@ class RoomsAddRequest(BaseModel):
     facilities_ids: list[int] = []
 
 
-class RoomsAdd(BaseModel):
+class RoomAdd(BaseModel):
     hotel_id: int
     title: str
     description: str | None = None
     price: Decimal
     quantity: int
 
-    model_config = ConfigDict(from_attributes=True)
 
-
-class RoomsPatchRequest(BaseModel):
+class RoomPatchRequest(BaseModel):
     title: str | None = None
     description: str | None = None
     price: Decimal | None = None
@@ -31,25 +29,21 @@ class RoomsPatchRequest(BaseModel):
     facilities_ids: list[int] = []
 
 
-class RoomsPatch(BaseModel):
+class RoomPatch(BaseModel):
     hotel_id: int
     title: str | None = None
     description: str | None = None
     price: Decimal | None = None
     quantity: int | None = None
 
-    model_config = ConfigDict(from_attributes=True)
 
-
-class Rooms(BaseModel):
+class Room(BaseModel):
     id: int
     title: str
     description: str | None
     price: Decimal
     facilities: list[Facility]
 
-    model_config = ConfigDict(from_attributes=True)
 
-
-class RoomsAvailable(Rooms):
+class RoomAvailable(Room):
     available_rooms: int

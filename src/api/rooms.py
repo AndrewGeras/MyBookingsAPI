@@ -4,8 +4,8 @@ from datetime import date
 from fastapi import APIRouter, Body, Query
 from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
-from src.schemas.rooms import RoomsAdd, RoomsAddRequest, RoomsPatch, RoomsPatchRequest
-from src.schemas.facilities import RoomFacilitiesAdd
+from src.schemas.rooms import RoomAdd, RoomAddRequest, RoomPatch, RoomPatchRequest
+from src.schemas.facilities import RoomFacilityAdd
 from src.utils.examples_data import room_data
 from src.api.dependencies import DBDep
 
@@ -33,13 +33,13 @@ async def get_specific_rooms(db: DBDep, hotel_id: int, room_id: int):
              description="<h2>Ручка для добавления информации о классе номеров в отель</h2>")
 async def create_rooms(db: DBDep,
                        hotel_id: int,
-                       rooms_data: Annotated[RoomsAddRequest, Body(openapi_examples=room_data)]):
-    rooms_data_ = RoomsAdd(hotel_id=hotel_id, **rooms_data.model_dump())
+                       rooms_data: Annotated[RoomAddRequest, Body(openapi_examples=room_data)]):
+    rooms_data_ = RoomAdd(hotel_id=hotel_id, **rooms_data.model_dump())
     room = await db.rooms.add(rooms_data_)
 
     facilities_ids = rooms_data.facilities_ids
     if facilities_ids:
-        room_facilities_data = [RoomFacilitiesAdd(room_id=room.id, facility_id=f_id) for f_id in facilities_ids]
+        room_facilities_data = [RoomFacilityAdd(room_id=room.id, facility_id=f_id) for f_id in facilities_ids]
         await db.room_facilities.add_bulk(room_facilities_data)
 
     await db.commit()
@@ -52,8 +52,8 @@ async def create_rooms(db: DBDep,
 async def update_rooms(db: DBDep,
                        hotel_id: int,
                        room_id: int,
-                       rooms_data: RoomsAddRequest):
-    await db.rooms.edit(data=RoomsAdd(hotel_id=hotel_id,
+                       rooms_data: RoomAddRequest):
+    await db.rooms.edit(data=RoomAdd(hotel_id=hotel_id,
                                       **rooms_data.model_dump()),
                         id=room_id)
     await db.room_facilities.upsert_or_delete(room_id=room_id,
@@ -67,8 +67,8 @@ async def update_rooms(db: DBDep,
 async def edit_rooms(db: DBDep,
                      hotel_id: int,
                      room_id: int,
-                     rooms_data: RoomsPatchRequest):
-    await db.rooms.edit(RoomsPatch(hotel_id=hotel_id,
+                     rooms_data: RoomPatchRequest):
+    await db.rooms.edit(RoomPatch(hotel_id=hotel_id,
                                    **rooms_data.model_dump(exclude_none=True)),
                         exclude_unset=True,
                         id=room_id)
