@@ -3,6 +3,7 @@ from datetime import date
 
 from fastapi import APIRouter, Body, Query
 from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
+from fastapi_cache.decorator import cache
 
 from src.schemas.rooms import RoomAdd, RoomAddRequest, RoomPatch, RoomPatchRequest
 from src.schemas.facilities import RoomFacilityAdd
@@ -14,6 +15,7 @@ router = APIRouter(prefix="/hotels", tags=["Классы номеров отел
 
 @router.get("/{hotel_id}/rooms",
             description="<h2>Ручка для получения информации обо всех классах номеров, доступных для бронирования в отеле</h2>")
+@cache(expire=30)
 async def get_all_rooms(db: DBDep,
                         hotel_id: int,
                         date_from: Annotated[date, Query(example="2026-05-08")],

@@ -3,6 +3,7 @@ from typing import Annotated
 
 from fastapi import Query, Body, APIRouter
 from starlette.status import HTTP_204_NO_CONTENT, HTTP_201_CREATED
+from fastapi_cache.decorator import cache
 
 from src.schemas.hotels import HotelAdd, HotelPATCH
 from src.api.dependencies import PaginationDep, DBDep
@@ -13,6 +14,7 @@ router = APIRouter(prefix="/hotels", tags=["Отели", ])
 
 @router.get("/all",
             description="<h2>Ручка для постраничного выбора отелей по названию и локации</h2>")
+@cache(expire=30)
 async def get_hotels(
         db: DBDep,
         pagination: PaginationDep,
@@ -31,6 +33,7 @@ async def get_hotels(
 
 @router.get("",
             description="<h2>Ручка для получения информации об отелях с номерами, доступными для бронирования</h2>")
+@cache(expire=30)
 async def get_available_hotels(
         db: DBDep,
         pagination: PaginationDep,
