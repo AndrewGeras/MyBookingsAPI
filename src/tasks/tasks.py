@@ -1,0 +1,9 @@
+from time import sleep
+
+from src.tasks.celery_app import celery_instance
+
+
+@celery_instance.task
+def task1(s: int):
+    sleep(s)
+    print("Task is complete")
