@@ -9,7 +9,7 @@ from src.schemas.hotels import HotelAdd, HotelPATCH
 from src.api.dependencies import PaginationDep, DBDep
 from src.utils.examples_data import hotel_example
 
-router = APIRouter(prefix="/hotels", tags=["Отели", ])
+router = APIRouter(prefix="/hotels", tags=["Отели"])
 
 
 @router.get("/all",
