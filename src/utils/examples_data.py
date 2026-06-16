@@ -1,3 +1,9 @@
+from datetime import date, timedelta
+
+
+df_exmp = date.today()
+dt_exmp = date.today() + timedelta(days=1)
+
 hotel_example = {
     "valid": {
         "summary": "Валидные данные",

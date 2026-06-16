@@ -7,7 +7,7 @@ from fastapi_cache.decorator import cache
 
 from src.schemas.hotels import HotelAdd, HotelPATCH
 from src.api.dependencies import PaginationDep, DBDep
-from src.utils.examples_data import hotel_example
+from src.utils.examples_data import hotel_example, df_exmp, dt_exmp
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
 
@@ -37,8 +37,8 @@ async def get_hotels(
 async def get_available_hotels(
         db: DBDep,
         pagination: PaginationDep,
-        date_from: date = Query(description="дата заезда", example="2026-05-07"),
-        date_to: date = Query(description="дата выезда", example="2026-05-10"),
+        date_from: date = Query(description="дата заезда", default=df_exmp, examples=[df_exmp]),
+        date_to: date = Query(description="дата выезда", default=dt_exmp, examples=[dt_exmp]),
         title: str | None = Query(default=None, description="название отеля"),
         location: str | None = Query(default=None, description="локация отеля")
 ):

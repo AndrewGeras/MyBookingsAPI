@@ -7,7 +7,7 @@ from fastapi_cache.decorator import cache
 
 from src.schemas.rooms import RoomAdd, RoomAddRequest, RoomPatch, RoomPatchRequest
 from src.schemas.facilities import RoomFacilityAdd
-from src.utils.examples_data import room_data
+from src.utils.examples_data import room_data, df_exmp, dt_exmp
 from src.api.dependencies import DBDep
 
 router = APIRouter(prefix="/hotels", tags=["Классы номеров отелей"])
@@ -18,8 +18,8 @@ router = APIRouter(prefix="/hotels", tags=["Классы номеров отел
 @cache(expire=30)
 async def get_all_rooms(db: DBDep,
                         hotel_id: int,
-                        date_from: Annotated[date, Query(example="2026-05-08")],
-                        date_to: Annotated[date, Query(example="2026-05-10")]):
+                        date_from: date = Query(default=df_exmp, examples=[df_exmp]),
+                        date_to: date = Query(default=dt_exmp, examples=[dt_exmp])):
     rooms = await db.rooms.get_available(hotel_id=hotel_id, date_from=date_from, date_to=date_to)
     return rooms if rooms else {"message": "Свободных номеров в данном отеле нет"}
 
