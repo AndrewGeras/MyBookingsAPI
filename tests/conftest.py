@@ -3,9 +3,12 @@ from pytest import fixture
 from httpx import AsyncClient, ASGITransport
 
 from src.config import settings
-from src.database import engine_null_pool
-from src.database import Base
+from src.database import engine_null_pool, async_session_maker_null_pool, Base
 from src.main import app
+from src.utils.db_manager import DBManager
+from src.utils.utils import read_file
+from src.schemas.hotels import HotelAdd
+from src.schemas.rooms import RoomAdd
 
 
 set_event_loop_policy(WindowsSelectorEventLoopPolicy())
@@ -18,9 +21,17 @@ def check_test_mode():
 
 @fixture(scope="session", autouse=True)
 async def setup_db(check_test_mode) -> None:
+    hotels = read_file("tests/mock_hotels.json")
+    rooms = read_file("tests/mock_rooms.json")
+
     async with engine_null_pool.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
+
+    async with DBManager(session_factory=async_session_maker_null_pool) as db:
+        await db.hotels.add_bulk([HotelAdd.model_validate(hotel) for hotel in hotels])
+        await db.rooms.add_bulk([RoomAdd.model_validate(room) for room in rooms])
+        await db.commit()
 
 
 @fixture(scope="session", autouse=True)
