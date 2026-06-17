@@ -14,13 +14,25 @@ from src.schemas.rooms import RoomAdd
 set_event_loop_policy(WindowsSelectorEventLoopPolicy())
 
 
+@fixture(scope="session")
+async def db() -> DBManager:
+    async with DBManager(session_factory=async_session_maker_null_pool) as db:
+        yield db
+
+
+@fixture(scope="session")
+async def ac() -> AsyncClient:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        yield ac
+
+
 @fixture(scope="session", autouse=True)
 def check_test_mode():
     assert settings.MODE == "TEST"
 
 
 @fixture(scope="session", autouse=True)
-async def setup_db(check_test_mode) -> None:
+async def setup_db(check_test_mode, db):
     hotels = read_file("tests/mock_hotels.json")
     rooms = read_file("tests/mock_rooms.json")
 
@@ -28,21 +40,18 @@ async def setup_db(check_test_mode) -> None:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
-    async with DBManager(session_factory=async_session_maker_null_pool) as db:
-        await db.hotels.add_bulk([HotelAdd.model_validate(hotel) for hotel in hotels])
-        await db.rooms.add_bulk([RoomAdd.model_validate(room) for room in rooms])
-        await db.commit()
+    await db.hotels.add_bulk([HotelAdd.model_validate(hotel) for hotel in hotels])
+    await db.rooms.add_bulk([RoomAdd.model_validate(room) for room in rooms])
+    await db.commit()
 
 
 @fixture(scope="session", autouse=True)
-async def register_test_user(setup_db):
-    async with AsyncClient(transport=ASGITransport(app=app),
-                           base_url="http://test") as ac:
-        await ac.post(
-            url="/auth/register",
-            json={
-                "nickname": "TestUser",
-                "email": "test@user.xyz",
-                "password": "test_password",
-            }
-        )
+async def register_test_user(setup_db, ac):
+    await ac.post(
+        url="/auth/register",
+        json={
+            "nickname": "TestUser",
+            "email": "test@user.xyz",
+            "password": "test_password",
+        }
+    )
