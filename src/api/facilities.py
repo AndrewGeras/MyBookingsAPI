@@ -1,4 +1,3 @@
-
 from typing import Annotated
 
 from fastapi import APIRouter, Body
@@ -28,5 +27,5 @@ async def add_facility(db: DBDep,
                        title: Annotated[FacilityAdd, Body()]):
     facility = await db.facilities.add(title)
     await db.commit()
-    task1.delay(5)
+    # task1.delay(5)
     return {"status": "OK", "details": facility}
