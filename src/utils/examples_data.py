@@ -58,3 +58,10 @@ room_data = {
         }
     },
 }
+
+
+test_user_data = {
+            "nickname": "TestUser",
+            "email": "test@user.xyz",
+            "password": "test_password",
+        }

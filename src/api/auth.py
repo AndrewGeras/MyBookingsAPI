@@ -42,7 +42,7 @@ async def login(db: DBDep, user_data: UserAuth,
     return {"message": "доступ разрешён", "user_data": User(**user.model_dump())}
 
 
-@router.get("/mе",
+@router.get("/me",
             description="<h2>Ручка для получения данных об авторизованном пользователе</h2>")
 async def auth_only(db: DBDep, user_id: UserIdDep):
     return await db.users.get_one_or_none(id=user_id)

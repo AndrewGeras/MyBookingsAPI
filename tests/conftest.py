@@ -17,6 +17,7 @@ from src.utils.db_manager import DBManager
 from src.utils.utils import read_file
 from src.schemas.hotels import HotelAdd
 from src.schemas.rooms import RoomAdd
+from src.utils.examples_data import test_user_data
 
 
 set_event_loop_policy(WindowsSelectorEventLoopPolicy())
@@ -63,9 +64,14 @@ async def setup_db(check_test_mode, db):
 async def register_test_user(setup_db, ac):
     await ac.post(
         url="/auth/register",
-        json={
-            "nickname": "TestUser",
-            "email": "test@user.xyz",
-            "password": "test_password",
-        }
+        json=test_user_data
     )
+
+
+@fixture(scope="session")
+async def authenticated_ac(register_test_user, ac):
+    await ac.post(
+        url="/auth/login",
+        json=test_user_data,
+    )
+    yield ac

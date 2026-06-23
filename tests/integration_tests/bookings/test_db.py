@@ -25,8 +25,8 @@ async def test_bookings_crud(db):
         assert test_data[key] == new_booking.__getattribute__(key)
 
     # test of reading
-    booking = (await db.bookings.get_filtered(id=1))[0]
-    booking_ = await db.bookings.get_one_or_none(id=1)
+    booking = (await db.bookings.get_filtered(id=new_booking.id))[0]
+    booking_ = await db.bookings.get_one_or_none(id=new_booking.id)
     today_checkin = await db.bookings.get_bookings_with_today_checkin()
     assert booking
     assert booking == new_booking
