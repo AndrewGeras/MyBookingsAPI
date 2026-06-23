@@ -36,6 +36,6 @@ async def book_room(db: DBDep,
         **booking_data.model_dump()
     )
 
-    booking_details = await db.bookings.add(_booking_data)
+    booking_details = await db.bookings.add_booking(_booking_data, room.hotel_id)
     await db.commit()
     return {"message": "Номер успешно забронирован", "details": booking_details}

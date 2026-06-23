@@ -39,6 +39,7 @@ class RoomPatch(BaseModel):
 
 class Room(BaseModel):
     id: int
+    hotel_id: int
     title: str
     description: str | None
     price: Decimal
