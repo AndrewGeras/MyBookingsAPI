@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from sqlalchemy import select, insert, update, delete
+from sqlalchemy import select, insert, update, delete, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import Base
@@ -63,3 +63,7 @@ class BaseRepository:
         result = await self.session.execute(delete_stmt)
         model = result.scalars().one_or_none()
         return self.mapper.map_to_domain_entity(get_object_or_404(model))
+
+    async def clear_all(self):
+        truncate_stmt = f"TRUNCATE TABLE {self.model.__tablename__} RESTART IDENTITY CASCADE;"
+        await self.session.execute(text(truncate_stmt))
