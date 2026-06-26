@@ -20,7 +20,10 @@ class BaseRepository:
         # print(query.compile(compile_kwargs={"literal_binds": True}))
 
         query_result = await self.session.scalars(query)
-        return [self.mapper.map_to_domain_entity(model) for model in get_object_or_404(query_result.all())]
+        return [
+            self.mapper.map_to_domain_entity(model)
+            for model in get_object_or_404(query_result.all())
+        ]
 
     async def get_all(self, *args, **kwargs) -> [BaseModel]:
         return await self.get_filtered()
@@ -47,23 +50,27 @@ class BaseRepository:
         except Exception as err:
             ExcHandler.handle_exception(err)
 
-    async def edit(self, data: BaseModel, exclude_unset=False, **filter_by) -> BaseModel | None:
-        update_stmt = (update(self.model)
-                       .filter_by(**filter_by)
-                       .values(**data.model_dump(exclude_unset=exclude_unset))
-                       .returning(self.model))
+    async def edit(
+        self, data: BaseModel, exclude_unset=False, **filter_by
+    ) -> BaseModel | None:
+        update_stmt = (
+            update(self.model)
+            .filter_by(**filter_by)
+            .values(**data.model_dump(exclude_unset=exclude_unset))
+            .returning(self.model)
+        )
         result = await self.session.execute(update_stmt)
         model = result.scalars().one_or_none()
         return self.mapper.map_to_domain_entity(get_object_or_404(model))
 
     async def delete(self, **filter_by) -> BaseModel | None:
-        delete_stmt = (delete(self.model)
-                       .filter_by(**filter_by)
-                       .returning(self.model))
+        delete_stmt = delete(self.model).filter_by(**filter_by).returning(self.model)
         result = await self.session.execute(delete_stmt)
         model = result.scalars().one_or_none()
         return self.mapper.map_to_domain_entity(get_object_or_404(model))
 
     async def clear_all(self):
-        truncate_stmt = f"TRUNCATE TABLE {self.model.__tablename__} RESTART IDENTITY CASCADE;"
+        truncate_stmt = (
+            f"TRUNCATE TABLE {self.model.__tablename__} RESTART IDENTITY CASCADE;"
+        )
         await self.session.execute(text(truncate_stmt))

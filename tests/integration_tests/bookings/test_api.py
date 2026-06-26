@@ -13,22 +13,23 @@ async def clear_bookings(db):
     await db.commit()
 
 
-@pytest.mark.parametrize("room_id, date_from, date_to, status_code", [
-    (room_id_, today_, tomorrow_, 201),
-    (room_id_, today_, tomorrow_, 201),
-    (room_id_, today_, tomorrow_, 201),
-    (room_id_, today_, tomorrow_, 201),
-    (room_id_, today_, tomorrow_, 201),
-    (room_id_, today_, tomorrow_, 400),
-])
-async def test_book_room(db, authenticated_ac, room_id, date_from, date_to, status_code):
+@pytest.mark.parametrize(
+    "room_id, date_from, date_to, status_code",
+    [
+        (room_id_, today_, tomorrow_, 201),
+        (room_id_, today_, tomorrow_, 201),
+        (room_id_, today_, tomorrow_, 201),
+        (room_id_, today_, tomorrow_, 201),
+        (room_id_, today_, tomorrow_, 201),
+        (room_id_, today_, tomorrow_, 400),
+    ],
+)
+async def test_book_room(
+    db, authenticated_ac, room_id, date_from, date_to, status_code
+):
     response = await authenticated_ac.post(
         url="/bookings",
-        json={
-            "room_id": room_id,
-            "date_from": date_from,
-            "date_to": date_to
-        }
+        json={"room_id": room_id, "date_from": date_from, "date_to": date_to},
     )
     res_status_code = response.status_code
     assert res_status_code == status_code
@@ -41,29 +42,30 @@ async def test_book_room(db, authenticated_ac, room_id, date_from, date_to, stat
         assert res["detail"] == "Нет доступных номеров для бронирования"
 
 
-@pytest.mark.parametrize("room_id, date_from, date_to, post_status, get_status, bookings_num", [
-    (room_id_, today_, tomorrow_, 201, 200, 1),
-    (room_id_, today_, tomorrow_, 201, 200, 2),
-    (room_id_, today_, tomorrow_, 201, 200, 3),
-    (room_id_, today_, tomorrow_, 201, 200, 4),
-    (room_id_, today_, tomorrow_, 201, 200, 5),
-    (room_id_, today_, tomorrow_, 400, 200, 5),
-])
-async def test_add_and_get_bookings(authenticated_ac,
-                                    clear_bookings,
-                                    room_id,
-                                    date_from,
-                                    date_to,
-                                    post_status,
-                                    get_status,
-                                    bookings_num):
+@pytest.mark.parametrize(
+    "room_id, date_from, date_to, post_status, get_status, bookings_num",
+    [
+        (room_id_, today_, tomorrow_, 201, 200, 1),
+        (room_id_, today_, tomorrow_, 201, 200, 2),
+        (room_id_, today_, tomorrow_, 201, 200, 3),
+        (room_id_, today_, tomorrow_, 201, 200, 4),
+        (room_id_, today_, tomorrow_, 201, 200, 5),
+        (room_id_, today_, tomorrow_, 400, 200, 5),
+    ],
+)
+async def test_add_and_get_bookings(
+    authenticated_ac,
+    clear_bookings,
+    room_id,
+    date_from,
+    date_to,
+    post_status,
+    get_status,
+    bookings_num,
+):
     add_booking_res = await authenticated_ac.post(
         url="/bookings",
-        json={
-            "room_id": room_id,
-            "date_from": date_from,
-            "date_to": date_to
-        }
+        json={"room_id": room_id, "date_from": date_from, "date_to": date_to},
     )
     my_bookings_res = await authenticated_ac.get(url="/bookings/me")
 

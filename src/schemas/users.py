@@ -2,9 +2,9 @@ from pydantic import BaseModel, EmailStr
 
 
 class UserRequestAdd(BaseModel):
-    nickname: str   # добавить валидацию на непустую строку
+    nickname: str  # добавить валидацию на непустую строку
     email: EmailStr
-    password: str   # добавить валидацию на непустую строку
+    password: str  # добавить валидацию на непустую строку
     first_name: str | None = None
     last_name: str | None = None
 

@@ -13,13 +13,11 @@ async def test_bookings_crud(db):
         "room_id": (await db.rooms.get_all())[0].id,
         "date_from": date.today(),
         "date_to": date.today() + timedelta(days=1),
-        "price": Decimal("2500.00")
+        "price": Decimal("2500.00"),
     }
 
     # test of creating
-    new_booking = await db.bookings.add(
-        BookingAdd(**test_data)
-    )
+    new_booking = await db.bookings.add(BookingAdd(**test_data))
     assert new_booking
     for key in test_data:
         assert test_data[key] == new_booking.__getattribute__(key)
@@ -35,7 +33,9 @@ async def test_bookings_crud(db):
 
     # test of updating
     date_to = date.today() + timedelta(days=2)
-    upd_booking = await db.bookings.edit(BookingPatch(date_to=date_to), id=new_booking.id, exclude_unset=True)
+    upd_booking = await db.bookings.edit(
+        BookingPatch(date_to=date_to), id=new_booking.id, exclude_unset=True
+    )
     assert new_booking != upd_booking
     assert upd_booking.date_to == date_to
 

@@ -40,4 +40,4 @@ app.include_router(image_router)
 
 
 if __name__ == "__main__":
-    run("src.main:app", port=8000,  reload=True)
+    run("src.main:app", port=8000, reload=True)

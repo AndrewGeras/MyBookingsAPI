@@ -20,4 +20,3 @@ def test_create_access_token():
 
     assert "exp" in payload
     assert isinstance(payload["exp"], int)
-

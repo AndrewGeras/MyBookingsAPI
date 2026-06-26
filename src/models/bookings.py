@@ -11,7 +11,9 @@ from src.database import Base
 
 class BookingsORM(Base):
     __tablename__ = "bookings"
-    __table_args__ = (CheckConstraint('date_to > date_from', name='check_booking_duration'),)
+    __table_args__ = (
+        CheckConstraint("date_to > date_from", name="check_booking_duration"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id"))
@@ -19,7 +21,9 @@ class BookingsORM(Base):
     date_from: Mapped[date]
     date_to: Mapped[date]
     price: Mapped[Decimal] = mapped_column(Numeric(precision=8, scale=2))
-    create_at: Mapped[datetime] = mapped_column(server_default=text("TIMEZONE('utc', now())"))
+    create_at: Mapped[datetime] = mapped_column(
+        server_default=text("TIMEZONE('utc', now())")
+    )
 
     @hybrid_property
     def total_cost(self) -> Decimal:

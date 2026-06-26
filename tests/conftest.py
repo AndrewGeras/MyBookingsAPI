@@ -3,7 +3,9 @@
 from unittest import mock
 
 # мокаем кэш https://github.com/long2ice/fastapi-cache/issues/49
-mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda func: func).start()
+mock.patch(
+    "fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda func: func
+).start()
 
 
 from asyncio import set_event_loop_policy, WindowsSelectorEventLoopPolicy
@@ -31,7 +33,9 @@ async def db() -> DBManager:
 
 @fixture(scope="session")
 async def ac() -> AsyncClient:
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
         yield ac
 
 
@@ -62,10 +66,7 @@ async def setup_db(check_test_mode, db):
 
 @fixture(scope="session", autouse=True)
 async def register_test_user(setup_db, ac):
-    await ac.post(
-        url="/auth/register",
-        json=test_user_data
-    )
+    await ac.post(url="/auth/register", json=test_user_data)
 
 
 @fixture(scope="session")

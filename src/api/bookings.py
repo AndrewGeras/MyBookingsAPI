@@ -8,32 +8,29 @@ from src.schemas.bookings import BookingAdd, BookingAddRequest
 router = APIRouter(prefix="/bookings", tags=["Бронирования"])
 
 
-@router.get("",
-            description="<h2>Ручка для получения всех бронирований</h2>")
+@router.get("", description="<h2>Ручка для получения всех бронирований</h2>")
 async def get_all_bookings(db: DBDep):
     return await db.bookings.get_all()
 
 
-@router.get("/me",
-            description="<h2>Ручка для получения пользовательских бронирований</h2>")
+@router.get(
+    "/me", description="<h2>Ручка для получения пользовательских бронирований</h2>"
+)
 async def get_my_bookings(db: DBDep, user_id: UserIdDep):
     return await db.bookings.get_filtered(user_id=user_id)
 
 
-@router.post("",
-             status_code=HTTP_201_CREATED,
-             description="<h2>Ручка для добавления бронирования номера в отеле</h2>")
-async def book_room(db: DBDep,
-                    user_id: UserIdDep,
-                    booking_data: BookingAddRequest
-                    ):
+@router.post(
+    "",
+    status_code=HTTP_201_CREATED,
+    description="<h2>Ручка для добавления бронирования номера в отеле</h2>",
+)
+async def book_room(db: DBDep, user_id: UserIdDep, booking_data: BookingAddRequest):
 
     room = await db.rooms.get_one_or_none(id=booking_data.room_id)
 
     _booking_data = BookingAdd(
-        user_id=user_id,
-        price=room.price,
-        **booking_data.model_dump()
+        user_id=user_id, price=room.price, **booking_data.model_dump()
     )
 
     booking_details = await db.bookings.add_booking(_booking_data, room.hotel_id)

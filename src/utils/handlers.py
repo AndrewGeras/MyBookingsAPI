@@ -9,12 +9,13 @@ from pydantic import BaseModel
 
 def get_object_or_404(obj: BaseModel | Sequence | None):
     if not obj:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Информация по запросу не найдена")
+        raise HTTPException(
+            status_code=HTTP_404_NOT_FOUND, detail="Информация по запросу не найдена"
+        )
     return obj
 
 
 class ExcHandler:
-
     @classmethod
     def handle_exception(cls, exc: Exception):
         if isinstance(exc, IntegrityError):

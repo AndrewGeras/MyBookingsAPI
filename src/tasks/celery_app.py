@@ -3,9 +3,7 @@ from celery.schedules import crontab
 
 from src.config import settings
 
-celery_inst = Celery('tasks',
-                     broker=settings.BROCKER_URL,
-                     include=['src.tasks.tasks'])
+celery_inst = Celery("tasks", broker=settings.BROCKER_URL, include=["src.tasks.tasks"])
 
 celery_inst.conf.beat_schedule = {
     "remind_bookings_today_checkin_schedule": {

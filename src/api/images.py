@@ -8,7 +8,6 @@ from src.tasks.tasks import create_image_thumbnail
 router = APIRouter(prefix="/images", tags=["Изображения"])
 
 
-
 @router.post("")
 def upload_image(file: UploadFile):
     image_path = os.path.join(os.getcwd(), os.path.normpath("static/images/"))

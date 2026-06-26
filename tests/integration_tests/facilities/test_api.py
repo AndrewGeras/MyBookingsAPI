@@ -2,6 +2,7 @@
 
 facility = "wi-fi"
 
+
 async def test_add_facility(ac):
     global facility
     response = await ac.post("/facilities", json={"title": facility})

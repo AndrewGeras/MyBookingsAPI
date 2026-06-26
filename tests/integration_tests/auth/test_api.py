@@ -11,11 +11,23 @@ async def clear_users(db):
 
 @pytest.mark.parametrize(
     "nickname, email, password, first_name, last_name, auth_status, login, pass_code, login_status, logged_status",
-    test_auth_data
+    test_auth_data,
 )
-async def test_auth_flow(nickname: str, email: str, password: str, first_name: str, last_name:str, auth_status: int,
-                         login: str, pass_code: str, login_status: int, logged_status: int,
-                         ac, db, clear_users):
+async def test_auth_flow(
+    nickname: str,
+    email: str,
+    password: str,
+    first_name: str,
+    last_name: str,
+    auth_status: int,
+    login: str,
+    pass_code: str,
+    login_status: int,
+    logged_status: int,
+    ac,
+    db,
+    clear_users,
+):
     register_resp = await ac.post(
         url="/auth/register",
         json={
@@ -23,8 +35,8 @@ async def test_auth_flow(nickname: str, email: str, password: str, first_name: s
             "email": email,
             "password": password,
             "first_name": first_name,
-            "last_name": last_name
-        }
+            "last_name": last_name,
+        },
     )
 
     auth_user = register_resp.json()
@@ -38,9 +50,7 @@ async def test_auth_flow(nickname: str, email: str, password: str, first_name: s
         assert "access_token" not in ac.cookies
 
     login_resp = await ac.post(
-        url="/auth/login",
-        json={"email": login,
-              "password": pass_code}
+        url="/auth/login", json={"email": login, "password": pass_code}
     )
 
     LOGIN_SC = login_resp.status_code
