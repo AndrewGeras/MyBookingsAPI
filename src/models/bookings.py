@@ -1,7 +1,7 @@
 from decimal import Decimal
 from datetime import date, datetime
 
-from sqlalchemy.orm import mapped_column, Mapped, validates
+from sqlalchemy.orm import mapped_column, Mapped
 from sqlalchemy import ForeignKey, Numeric, text
 from sqlalchemy.schema import CheckConstraint
 from sqlalchemy.ext.hybrid import hybrid_property

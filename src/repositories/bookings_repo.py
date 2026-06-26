@@ -4,7 +4,6 @@ from sqlalchemy import select
 from fastapi.exceptions import HTTPException
 from starlette.status import HTTP_400_BAD_REQUEST
 
-from src.models import RoomsORM
 from src.repositories.base_repo import BaseRepository
 from src.models.bookings import BookingsORM
 from src.schemas.bookings import BookingAdd

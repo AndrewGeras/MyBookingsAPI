@@ -7,7 +7,7 @@ from alembic import context
 
 
 from src.database import Base
-from src.models import *
+from src.models import *    #noqa: F403
 
 from src.config import settings
 

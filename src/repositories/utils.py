@@ -25,7 +25,7 @@ def get_available_by_date(date_from: date,
 
     rooms_at_hotel = select(RoomsORM.id).select_from(RoomsORM)
 
-    if not hotel_id is None:
+    if hotel_id is not None:
         rooms_at_hotel = rooms_at_hotel.filter_by(hotel_id=hotel_id)
 
     subq = rooms_at_hotel.subquery()

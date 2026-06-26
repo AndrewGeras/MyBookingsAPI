@@ -11,7 +11,7 @@ router = APIRouter(prefix="/images", tags=["Изображения"])
 
 @router.post("")
 def upload_image(file: UploadFile):
-    image_path = os.path.join(os.getcwd(), os.path.normpath(f"static/images/"))
+    image_path = os.path.join(os.getcwd(), os.path.normpath("static/images/"))
     image_name = os.path.join(image_path, file.filename)
 
     with open(image_name, "wb+") as new_file:

@@ -1,3 +1,5 @@
+# ruff: noqa: E402
+
 from unittest import mock
 
 # мокаем кэш https://github.com/long2ice/fastapi-cache/issues/49
@@ -7,8 +9,6 @@ mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda func:
 from asyncio import set_event_loop_policy, WindowsSelectorEventLoopPolicy
 from pytest import fixture
 from httpx import AsyncClient, ASGITransport
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.inmemory import InMemoryBackend
 
 from src.config import settings
 from src.database import engine_null_pool, async_session_maker_null_pool, Base
