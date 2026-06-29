@@ -1,5 +1,6 @@
 # ruff: noqa: E402
 
+from typing import AsyncGenerator
 from unittest import mock
 
 # мокаем кэш https://github.com/long2ice/fastapi-cache/issues/49
@@ -26,13 +27,13 @@ set_event_loop_policy(WindowsSelectorEventLoopPolicy())
 
 
 @fixture(scope="session")
-async def db() -> DBManager:
+async def db() -> AsyncGenerator[DBManager, None]:
     async with DBManager(session_factory=async_session_maker_null_pool) as db:
         yield db
 
 
 @fixture(scope="session")
-async def ac() -> AsyncClient:
+async def ac() -> AsyncGenerator[AsyncClient, None]:
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
@@ -70,7 +71,7 @@ async def register_test_user(setup_db, ac):
 
 
 @fixture(scope="session")
-async def authenticated_ac(register_test_user, ac):
+async def authenticated_ac(register_test_user, ac) -> AsyncGenerator[AsyncClient, None]:
     await ac.post(
         url="/auth/login",
         json=test_user_data,

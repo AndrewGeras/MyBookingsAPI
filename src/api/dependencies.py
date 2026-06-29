@@ -35,7 +35,7 @@ def get_token(request: Request):
     return access_token
 
 
-def get_current_user_id(token: str = Depends(get_token)) -> int:
+def get_current_user_id(token: str = Depends(get_token)):
     try:
         payload = AuthService().decode_token(token)
         return payload.get("user_id")

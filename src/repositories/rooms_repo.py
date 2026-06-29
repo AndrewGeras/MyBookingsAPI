@@ -18,14 +18,14 @@ class RoomsRepo(BaseRepository):
 
     async def get_available(
         self, hotel_id: int, date_from: date, date_to: date
-    ) -> [BaseModel]:
+    ) -> list[type[BaseModel]]:
         available_rooms = get_available_by_date(date_from, date_to, hotel_id).cte()
 
         query = (
             select(self.model, available_rooms.c.available_rooms)
-            .options(selectinload(self.model.facilities))
-            .join(available_rooms, available_rooms.c.id == self.model.id)
-            .filter(self.model.id.in_(select(available_rooms.c.id)))
+            .options(selectinload(RoomsORM.facilities))
+            .join(available_rooms, available_rooms.c.id == RoomsORM.id)
+            .filter(RoomsORM.id.in_(select(available_rooms.c.id)))
         )
 
         query_result = await self.session.execute(query)
@@ -40,10 +40,10 @@ class RoomsRepo(BaseRepository):
             for room_data in result_iterator
         ]
 
-    async def get_one_or_none(self, **filters) -> BaseModel | None:
+    async def get_one_or_none(self, **filters):
         query = (
             select(self.model)
-            .options(selectinload(self.model.facilities))
+            .options(selectinload(RoomsORM.facilities))
             .filter_by(**filters)
         )
         query_result = await self.session.scalars(query)

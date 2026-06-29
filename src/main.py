@@ -23,7 +23,7 @@ from src.api.images import router as image_router
 async def lifespan(app: FastAPI):
     "контекстный менеджер управляющий подключением к Redis"
     await redis_manager.connect()  # при старте приложения
-    FastAPICache.init(RedisBackend(redis_manager.redis), prefix="fastapi-cache")
+    FastAPICache.init(RedisBackend(redis_manager._redis), prefix="fastapi-cache")
     yield
     await redis_manager.close()  # при остановке/перезапуске приложения
 

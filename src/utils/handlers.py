@@ -6,8 +6,10 @@ from starlette.exceptions import HTTPException
 from starlette.status import HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 from pydantic import BaseModel
 
+from src.database import Base
 
-def get_object_or_404(obj: BaseModel | Sequence | None):
+
+def get_object_or_404(obj: Base | BaseModel | Sequence | None):
     if not obj:
         raise HTTPException(
             status_code=HTTP_404_NOT_FOUND, detail="Информация по запросу не найдена"
@@ -22,4 +24,4 @@ class ExcHandler:
             if isinstance(exc.orig, Error):
                 message = exc.orig.diag.message_detail
                 raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=message)
-            raise exc
+        raise exc

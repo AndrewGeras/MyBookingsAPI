@@ -16,7 +16,7 @@ class BookingsRepo(BaseRepository):
     mapper = BookingMapper
 
     async def get_bookings_with_today_checkin(self):
-        query = select(self.model).filter(self.model.date_from == date.today())
+        query = select(BookingsORM).filter(BookingsORM.date_from == date.today())
 
         bookings = await self.session.scalars(query)
         return [self.mapper.map_to_domain_entity(booking) for booking in bookings.all()]
@@ -30,7 +30,7 @@ class BookingsRepo(BaseRepository):
 
         if data.room_id in available_rooms_ids:
             return await self.add(data)
-        raise HTTPException(
+        raise HTTPException(    # обработать исключение через кастомный обработчик, не прибегая к сущностям fastAPI
             status_code=HTTP_400_BAD_REQUEST,
             detail="Нет доступных номеров для бронирования",
         )

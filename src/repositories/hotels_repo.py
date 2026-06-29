@@ -14,12 +14,12 @@ class HotelsRepo(BaseRepository):
     model = HotelsORM
     mapper = HotelMapper
 
-    async def get_all(self, title: str, location: str, limit: int, offset: int):
-        query = select(self.model).order_by(self.model.id)
+    async def get_all(self, title: str | None, location: str | None, limit: int, offset: int):
+        query = select(self.model).order_by(HotelsORM.id)
         if title:
-            query = query.where(self.model.title.ilike(f"%{title.strip()}%"))
+            query = query.where(HotelsORM.title.ilike(f"%{title.strip()}%"))
         if location:
-            query = query.where(self.model.location.ilike(f"%{location.strip()}%"))
+            query = query.where(HotelsORM.location.ilike(f"%{location.strip()}%"))
 
         query = query.limit(limit).offset(offset)
 
@@ -34,24 +34,24 @@ class HotelsRepo(BaseRepository):
 
     async def get_available(
         self,
-        title: str,
-        location: str,
+        title: str | None,
+        location: str | None,
         limit: int,
         offset: int,
         date_from: date,
         date_to: date,
-    ) -> [BaseModel]:
+    ) -> list[type[BaseModel]]:
         hotels = select(self.model).cte("hotels")
         if title:
             hotels = (
                 select(self.model)
-                .where(self.model.title.ilike(f"%{title.strip()}%"))
+                .where(HotelsORM.title.ilike(f"%{title.strip()}%"))
                 .cte("hotels")
             )
         if location:
             hotels = (
                 select(self.model)
-                .where(self.model.location.ilike(f"%{location.strip()}%"))
+                .where(HotelsORM.location.ilike(f"%{location.strip()}%"))
                 .cte("hotels")
             )
 

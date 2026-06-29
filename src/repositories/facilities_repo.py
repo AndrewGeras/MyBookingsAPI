@@ -18,7 +18,7 @@ class RoomFacilityRepo(BaseRepository):
     async def upsert_or_delete(self, room_id: int, facilities_ids: list[int]):
 
         facil_ids_query_result = await self.session.execute(
-            (select(self.model.facility_id).filter_by(room_id=room_id))
+            (select(RoomFacilitiesORM.facility_id).filter_by(room_id=room_id))
         )
         current_ids = set(facil_ids_query_result.scalars().all())
 
@@ -28,8 +28,8 @@ class RoomFacilityRepo(BaseRepository):
         await self.session.execute(
             (
                 delete(self.model).filter(
-                    self.model.room_id == room_id,
-                    self.model.facility_id.in_(deletable_ids),
+                    RoomFacilitiesORM.room_id == room_id,
+                    RoomFacilitiesORM.facility_id.in_(deletable_ids),
                 )
             )
         )

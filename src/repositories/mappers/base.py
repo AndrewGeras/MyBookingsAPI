@@ -1,4 +1,4 @@
-from typing import TypeVar, Generic
+from typing import TypeVar, Generic, Any, Sequence
 
 from pydantic import BaseModel
 
@@ -14,7 +14,7 @@ class DataMapper(Generic[DBModelType, SchemaType]):
     schema: type[SchemaType]
 
     @classmethod
-    def map_to_domain_entity(cls, data: DBModelType) -> SchemaType:
+    def map_to_domain_entity(cls, data: DBModelType | dict[Any, Any] | Base | BaseModel | Sequence) -> SchemaType:
         return cls.schema.model_validate(data, from_attributes=True)
 
     @classmethod

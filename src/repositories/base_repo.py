@@ -8,13 +8,13 @@ from src.utils.handlers import ExcHandler, get_object_or_404
 
 
 class BaseRepository:
-    model: Base = None
+    model: type[Base]
     mapper = DataMapper
 
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_filtered(self, **filters) -> [BaseModel]:
+    async def get_filtered(self, **filters) -> list[type[BaseModel]]:
         query = select(self.model).filter_by(**filters)
 
         # print(query.compile(compile_kwargs={"literal_binds": True}))
@@ -25,25 +25,25 @@ class BaseRepository:
             for model in get_object_or_404(query_result.all())
         ]
 
-    async def get_all(self, *args, **kwargs) -> [BaseModel]:
+    async def get_all(self, *args, **kwargs) -> list[type[BaseModel]]:
         return await self.get_filtered()
 
-    async def get_one_or_none(self, **filters) -> BaseModel | None:
+    async def get_one_or_none(self, **filters):
         query = select(self.model).filter_by(**filters)
         query_result = await self.session.scalars(query)
         model = query_result.one_or_none()
         return self.mapper.map_to_domain_entity(get_object_or_404(model))
 
-    async def add(self, data: BaseModel) -> BaseModel | None:
+    async def add(self, data: BaseModel):
         add_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
+        result = await self.session.execute(add_stmt)
         try:
-            result = await self.session.execute(add_stmt)
             model = result.scalars().one()
             return self.mapper.map_to_domain_entity(model)
         except Exception as err:
             ExcHandler.handle_exception(err)
 
-    async def add_bulk(self, bulk_data: list[BaseModel]):
+    async def add_bulk(self, bulk_data: list):
         add_stmt = insert(self.model).values([item.model_dump() for item in bulk_data])
         try:
             await self.session.execute(add_stmt)
